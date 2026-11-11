@@ -1,0 +1,26 @@
+# Secrets and credentials: never committed (public repo)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*kubeconfig*
+.env
+.env.*
+*token*
+*secret*.yaml
+!**/external_secret*.yaml
+*.tfstate*
+
+# Local tool state
+.helm/
+.kube/
+*.retry
+.ansible/
+__pycache__/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
