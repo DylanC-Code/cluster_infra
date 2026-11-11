@@ -1,0 +1,41 @@
+{
+    "name": "cluster_infra",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh_host,type=bind,readonly",
+        "source=cluster_infra_eu1_kube,target=/home/vscode/.kube,type=volume"
+    ],
+    "remoteEnv": {
+        "HELM_CONFIG_HOME": "${containerWorkspaceFolder}/.helm/config",
+        "HELM_CACHE_HOME": "${containerWorkspaceFolder}/.helm/cache",
+        "HELM_DATA_HOME": "${containerWorkspaceFolder}/.helm/data"
+    },
+    "postStartCommand": {
+        "ssh": "bash .devcontainer/setup_ssh.sh",
+        "shell": "bash .devcontainer/setup_shell.sh ${containerWorkspaceFolder}"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "redhat.vscode-yaml",
+                "redhat.ansible",
+                "ms-kubernetes-tools.vscode-kubernetes-tools",
+                "timonwong.shellcheck",
+                "editorconfig.editorconfig"
+            ],
+            "settings": {
+                "vs-kubernetes": {
+                    "vs-kubernetes.kubectl-path": "/usr/local/bin/kubectl",
+                    "vs-kubernetes.helm-path": "/usr/local/bin/helm"
+                },
+                "terminal.integrated.defaultProfile.linux": "zsh"
+            }
+        }
+    }
+}
