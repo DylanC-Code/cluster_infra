@@ -1,0 +1,9 @@
+# Admin account created by the baseline role, used for every later run
+admin_user: dylan
+ansible_user: "{{ admin_user }}"
+
+# Public key allowed to log in as the admin user (safe to commit)
+admin_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFxtl54dFjJ5bA675DJDLcDaohA8KkUbdOP2DDfIi0zm"
+
+ansible_ssh_private_key_file: ~/.ssh/infra.pub
+ansible_ssh_common_args: -o IdentitiesOnly=yes

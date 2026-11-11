@@ -1,0 +1,20 @@
+# Full node setup. Run from ansible/:
+#   ansible-playbook playbooks/site.yaml
+# First run on a freshly reinstalled VPS (dylan doesn't exist yet):
+#   ansible-playbook playbooks/site.yaml -e ansible_user=ubuntu   (OVH)
+#   ansible-playbook playbooks/site.yaml -e ansible_user=root     (Hostinger)
+- name: Baseline for every node
+  hosts: eu1_servers
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Read the sudo password from Bitwarden Secrets Manager
+      ansible.builtin.set_fact:
+        ansible_become_password: "{{ lookup('community.general.bitwarden_secrets_manager', sudo_password_secret_id).value }}"
+      no_log: true
+
+    - name: Gather facts about the node
+      ansible.builtin.setup:
+
+  roles:
+    - baseline
