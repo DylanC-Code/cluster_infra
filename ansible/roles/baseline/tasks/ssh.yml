@@ -1,0 +1,22 @@
+# SSH server hardening: key-only, admin user only.
+# The config is tested before reloading: a broken config never goes live.
+
+- name: Install the hardening drop-in
+  ansible.builtin.template:
+    src: 10_hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/10_hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload SSH
+
+# sshd -t needs this folder; Ubuntu 24.04 starts SSH on demand and may not have it yet
+- name: Make sure the SSH runtime folder exists
+  ansible.builtin.file:
+    path: /run/sshd
+    state: directory
+    mode: "0755"
+
+- name: Test the full SSH configuration
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false

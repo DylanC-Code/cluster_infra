@@ -1,0 +1,6 @@
+# Baseline: everything a node needs before k3s. One file per concept.
+- name: Admin user
+  ansible.builtin.import_tasks: users.yml
+
+- name: SSH hardening
+  ansible.builtin.import_tasks: ssh.yml

@@ -8,9 +8,22 @@
   gather_facts: false
   become: true
   pre_tasks:
+    # Runs in the devcontainer, before any connection to the nodes
+    - name: Check the Bitwarden token is set in this shell
+      ansible.builtin.assert:
+        that: lookup('env', 'BWS_ACCESS_TOKEN') | length > 0
+        fail_msg: "BWS_ACCESS_TOKEN is not set. Run bws_login, then try again."
+        quiet: true
+      run_once: true
+
     - name: Read the sudo password from Bitwarden Secrets Manager
       ansible.builtin.set_fact:
-        ansible_become_password: "{{ lookup('community.general.bitwarden_secrets_manager', sudo_password_secret_id).value }}"
+        admin_sudo_password: "{{ lookup('community.general.bitwarden_secrets_manager', sudo_password_secret_id).value }}"
+      no_log: true
+
+    - name: Use it to become root on the node
+      ansible.builtin.set_fact:
+        ansible_become_password: "{{ admin_sudo_password }}"
       no_log: true
 
     - name: Gather facts about the node

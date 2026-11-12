@@ -1,0 +1,8 @@
+# Groups the admin user belongs to: sudo gives root with a password
+admin_groups:
+  - sudo
+admin_shell: /bin/bash
+
+# Fixed salt per node: the password hash stays identical between runs,
+# so Ansible reports "ok" instead of "changed" every time (idempotence)
+admin_password_salt: "{{ inventory_hostname | hash('sha1') | truncate(16, true, '') }}"
