@@ -1,0 +1,7 @@
+# Apps running on eu1, one line per app and environment:
+#   - app: website
+#     env: staging
+# bootstrap/apps_appset.yaml turns each line into an Argo CD Application
+# named <app>-<env>, built from apps/<app>/overlays/<env>/, in its own
+# namespace <app>-<env>. Empty until the first app (the website).
+[]

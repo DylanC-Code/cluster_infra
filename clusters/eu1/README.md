@@ -9,7 +9,7 @@ Nodes and admin UIs live on `dylancastor.dev`; apps on their own domains.
 | --- | --- |
 | `bootstrap/` | `bootstrap.sh` (the only steps run by hand), the root Application, the ApplicationSets |
 | `platform.yaml` | Platform components running on eu1 |
+| `apps.yaml` | Apps and environments running on eu1 |
 | `values/` | eu1's settings for each component |
 
-`apps.yaml` arrives with the first app. Bootstrap procedure:
-`runbooks/cluster/bootstrap.md`.
+Bootstrap procedure: `runbooks/cluster/bootstrap.md`.

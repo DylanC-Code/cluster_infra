@@ -1,0 +1,38 @@
+# One Argo CD Application per line of clusters/eu1/apps.yaml.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/DylanC-Code/cluster_infra.git
+        revision: main
+        files:
+          - path: clusters/eu1/apps.yaml
+  template:
+    metadata:
+      name: '{{ .app | replace "_" "-" }}-{{ .env }}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/DylanC-Code/cluster_infra.git
+        targetRevision: main
+        path: "apps/{{ .app }}/overlays/{{ .env }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ .app | replace "_" "-" }}-{{ .env }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+        # Labels read by the guardrails (Phase 6)
+        managedNamespaceMetadata:
+          labels:
+            app: '{{ .app | replace "_" "-" }}'
+            env: "{{ .env }}"
