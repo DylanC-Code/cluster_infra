@@ -1,5 +1,6 @@
 # par1.yaml
 ansible_host: par1.dylancastor.dev
+public_ip: 2.24.59.184
 provider: hostinger
 
 # Bitwarden Secrets Manager ID of eu1_par1_sudo_password

@@ -1,5 +1,6 @@
 # waw1.yaml
 ansible_host: waw1.dylancastor.dev
+public_ip: 146.59.126.75
 provider: ovh
 # Bitwarden Secrets Manager ID of eu1_waw1_sudo_password
 sudo_password_secret_id: 3333c901-2ce3-4a3e-abb8-b4ff016d690f

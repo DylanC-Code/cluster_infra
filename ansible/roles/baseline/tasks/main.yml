@@ -5,6 +5,9 @@
 - name: SSH hardening
   ansible.builtin.import_tasks: ssh.yml
 
+- name: Node firewall
+  ansible.builtin.import_tasks: firewall.yml
+
 - name: Hostname
   ansible.builtin.import_tasks: hostname.yml
 

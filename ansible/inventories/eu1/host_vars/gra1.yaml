@@ -1,5 +1,6 @@
 # gra1.yaml
 ansible_host: gra1.dylancastor.dev
+public_ip: 193.70.85.94
 provider: ovh
 # Bitwarden Secrets Manager ID of eu1_gra1_sudo_password
 sudo_password_secret_id: 261b5e7d-9766-4e29-83d9-b4ff016da8bd
