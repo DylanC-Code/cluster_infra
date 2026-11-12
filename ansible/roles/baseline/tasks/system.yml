@@ -1,0 +1,47 @@
+# Clock and security updates.
+
+# ---------- Clock ----------
+- name: Use UTC everywhere
+  community.general.timezone:
+    name: Etc/UTC
+
+- name: Install the time sync service
+  ansible.builtin.apt:
+    name: systemd-timesyncd
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Keep the clock synchronized
+  ansible.builtin.service:
+    name: systemd-timesyncd
+    state: started
+    enabled: true
+
+# ---------- Security updates ----------
+- name: Install automatic updates
+  ansible.builtin.apt:
+    name: unattended-upgrades
+    state: present
+
+- name: Check for and install security updates every day
+  ansible.builtin.copy:
+    content: |
+      // Managed by Ansible (baseline role)
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: "0644"
+
+# Reboots are coordinated by kured, one node at a time
+- name: Never reboot automatically after an update
+  ansible.builtin.copy:
+    content: |
+      // Managed by Ansible (baseline role)
+      Unattended-Upgrade::Automatic-Reboot "false";
+    dest: /etc/apt/apt.conf.d/99_no_auto_reboot
+    owner: root
+    group: root
+    mode: "0644"

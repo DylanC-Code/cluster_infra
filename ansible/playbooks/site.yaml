@@ -16,14 +16,11 @@
         quiet: true
       run_once: true
 
-    - name: Read the sudo password from Bitwarden Secrets Manager
+    # The inventory reads it from Bitwarden; keeping it as a fact
+    # avoids one Bitwarden call per task for the rest of the run
+    - name: Read the sudo password once for this run
       ansible.builtin.set_fact:
-        admin_sudo_password: "{{ lookup('community.general.bitwarden_secrets_manager', sudo_password_secret_id).value }}"
-      no_log: true
-
-    - name: Use it to become root on the node
-      ansible.builtin.set_fact:
-        ansible_become_password: "{{ admin_sudo_password }}"
+        admin_sudo_password: "{{ admin_sudo_password }}"
       no_log: true
 
     - name: Gather facts about the node

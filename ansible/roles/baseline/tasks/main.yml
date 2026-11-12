@@ -10,3 +10,9 @@
 
 - name: Network
   ansible.builtin.import_tasks: network.yml
+
+- name: Clock and updates
+  ansible.builtin.import_tasks: system.yml
+
+- name: Provider leftovers
+  ansible.builtin.import_tasks: cleanup.yml

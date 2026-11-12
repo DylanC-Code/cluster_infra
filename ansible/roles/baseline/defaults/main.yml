@@ -6,3 +6,7 @@ admin_shell: /bin/bash
 # Fixed salt per node: the password hash stays identical between runs,
 # so Ansible reports "ok" instead of "changed" every time (idempotence)
 admin_password_salt: "{{ inventory_hostname | hash('sha1') | truncate(16, true, '') }}"
+
+# Accounts created by provider images, removed once the admin user exists
+provider_default_users:
+  - ubuntu
