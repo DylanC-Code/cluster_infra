@@ -10,6 +10,17 @@ alias kga='kubectl get all -A'
 alias kd='kubectl describe'
 alias kl='kubectl logs'
 
+# ---------- API tunnel (to eu1-api, see ~/.ssh/config.d/cluster) ----------
+alias ktunnel='ssh -fN eu1-api'
+alias ktunnel_stop='pkill -f "ssh -fN eu1-api"'
+
+# ---------- Web UIs (port-forwards, Ctrl+C to close) ----------
+# Argo CD: https://localhost:8080
+alias kargo='kubectl -n argocd port-forward svc/argocd-server 8080:443'
+# Hubble: http://localhost:12000
+alias khubble='cilium hubble ui --open-browser=false'
+alias kgrafana='kubectl -n monitoring port-forward svc/monitoring-grafana 3000:80'
+
 # ---------- Bitwarden Secrets Manager ----------
 # Asks for the Ansible token without showing or recording it.
 # Lives only in this shell: run it again in each new terminal.
@@ -18,16 +29,6 @@ bws_login() {
   read -rs BWS_ACCESS_TOKEN && export BWS_ACCESS_TOKEN
   echo
 }
-
-# ---------- API tunnel ----------
-# Added in Phase 3, once the eu1 API is reachable.
-
-# ---------- Web UIs (port-forwards, Ctrl+C to close) ----------
-# Argo CD: https://localhost:8080
-alias kargo='kubectl -n argocd port-forward svc/argocd-server 8080:443'
-# Hubble: http://localhost:12000
-alias khubble='cilium hubble ui --open-browser=false'
-alias kgrafana='kubectl -n monitoring port-forward svc/monitoring-grafana 3000:80'
 
 # ---------- Tab completion ----------
 if [ -n "${ZSH_VERSION:-}" ]; then
