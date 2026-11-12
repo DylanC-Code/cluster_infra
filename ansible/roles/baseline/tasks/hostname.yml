@@ -1,0 +1,21 @@
+# Node name = inventory name (par1, waw1, gra1), kept across reboots.
+
+# Without this, cloud-init sets the provider's name again at every boot
+- name: Stop cloud-init from managing the hostname
+  ansible.builtin.copy:
+    content: "preserve_hostname: true\n"
+    dest: /etc/cloud/cloud.cfg.d/99_keep_hostname.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set the hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+# Lets the node resolve its own name without DNS (sudo needs it)
+- name: Point the hostname to the local machine
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s'
+    line: "127.0.1.1 {{ inventory_hostname }}"
