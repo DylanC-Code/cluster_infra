@@ -1,0 +1,59 @@
+# Cilium settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/cilium.yaml
+# chart: cilium from https://helm.cilium.io
+# chart-version: 1.20.4
+
+# ---------- Service routing ----------
+# Cilium replaces kube-proxy (disabled in k3s)
+kubeProxyReplacement: true
+
+# Pod traffic leaving the node takes the node's IP, done in eBPF
+bpf:
+  masquerade: true
+
+# ---------- Pod IP addresses ----------
+# Cilium splits the cluster's range per node (range: cluster values)
+ipam:
+  mode: cluster-pool
+
+# ---------- Traffic between nodes ----------
+# VXLAN between nodes, itself inside WireGuard:
+# on the wire, only UDP 51871
+routingMode: tunnel
+tunnelProtocol: vxlan
+encryption:
+  enabled: true
+  type: wireguard
+
+# ---------- Config changes ----------
+# Restart the agents and the operator when their config changes
+rollOutCiliumPods: true
+operator:
+  rollOutPods: true
+  prometheus:
+    enabled: true
+
+# ---------- Metrics ----------
+# Exposed now, scraped once VictoriaMetrics arrives (Phase 5)
+prometheus:
+  enabled: true
+
+# ---------- Hubble: live traffic visibility ----------
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - icmp
+  # Certificates renewed by a CronJob rather than at each render,
+  # so Argo CD doesn't see a change on every sync
+  tls:
+    auto:
+      method: cronJob

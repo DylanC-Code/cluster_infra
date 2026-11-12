@@ -1,0 +1,22 @@
+# eu1 settings for Cilium.
+# Shared settings: platform/networking/cilium/values.yaml
+
+# Unique per cluster: needed if eu1 and the US cluster are ever
+# linked (Cluster Mesh), and disruptive to change later
+cluster:
+  name: eu1
+  id: 1
+
+# ---------- Reaching the API ----------
+# kube-proxy is off, so Cilium needs the API address before it can route.
+# Every eu1 node runs the API: each agent uses its own node's.
+# (A worker-only node would need 127.0.0.1:6444, k3s's local load balancer.)
+k8sServiceHost: 127.0.0.1
+k8sServicePort: 6443
+
+# ---------- Pod IP addresses ----------
+# k3s's default range; another cluster gets a different one
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDRList:
+      - 10.42.0.0/16
