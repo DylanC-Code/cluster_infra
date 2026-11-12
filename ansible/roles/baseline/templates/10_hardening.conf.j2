@@ -1,0 +1,17 @@
+# Managed by Ansible (baseline role): local edits are overwritten.
+# Loaded before the distribution's own drop-ins (10_ < 50_), so these win.
+
+# Only the admin user, only with a key
+PermitRootLogin no
+AllowUsers {{ admin_user }}
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+
+# Fewer chances for automated attacks
+MaxAuthTries 3
+LoginGraceTime 30
+
+# Not needed on servers. Port forwarding stays allowed: the API tunnel uses it.
+X11Forwarding no
+AllowAgentForwarding no

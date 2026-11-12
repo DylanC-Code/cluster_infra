@@ -1,0 +1,17 @@
+# Managed by Ansible (baseline role)
+# Loads and removes only the node_firewall table (never "flush ruleset",
+# which would also wipe the rules of k3s and Cilium).
+[Unit]
+Description=Node firewall
+Wants=network-pre.target
+Before=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/node_firewall.nft
+ExecReload=/usr/sbin/nft -f /etc/node_firewall.nft
+ExecStop=/usr/sbin/nft delete table inet node_firewall
+
+[Install]
+WantedBy=multi-user.target

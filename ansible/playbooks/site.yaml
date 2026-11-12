@@ -1,0 +1,30 @@
+# Full node setup. Run from ansible/:
+#   ansible-playbook playbooks/site.yaml
+# First run on a freshly reinstalled VPS (dylan doesn't exist yet):
+#   ansible-playbook playbooks/site.yaml -e ansible_user=ubuntu   (OVH)
+#   ansible-playbook playbooks/site.yaml -e ansible_user=root     (Hostinger)
+- name: Baseline for every node
+  hosts: eu1_servers
+  gather_facts: false
+  become: true
+  pre_tasks:
+    # Runs in the devcontainer, before any connection to the nodes
+    - name: Check the Bitwarden token is set in this shell
+      ansible.builtin.assert:
+        that: lookup('env', 'BWS_ACCESS_TOKEN') | length > 0
+        fail_msg: "BWS_ACCESS_TOKEN is not set. Run bws_login, then try again."
+        quiet: true
+      run_once: true
+
+    # The inventory reads it from Bitwarden; keeping it as a fact
+    # avoids one Bitwarden call per task for the rest of the run
+    - name: Read the sudo password once for this run
+      ansible.builtin.set_fact:
+        admin_sudo_password: "{{ admin_sudo_password }}"
+      no_log: true
+
+    - name: Gather facts about the node
+      ansible.builtin.setup:
+
+  roles:
+    - baseline

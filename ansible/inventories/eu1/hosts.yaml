@@ -1,0 +1,8 @@
+# The eu1 cluster: all three nodes run the control plane and etcd
+all:
+  children:
+    eu1_servers:
+      hosts:
+        par1:
+        waw1:
+        gra1:

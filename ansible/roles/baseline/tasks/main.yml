@@ -1,0 +1,21 @@
+# Baseline: everything a node needs before k3s. One file per concept.
+- name: Admin user
+  ansible.builtin.import_tasks: users.yml
+
+- name: SSH hardening
+  ansible.builtin.import_tasks: ssh.yml
+
+- name: Node firewall
+  ansible.builtin.import_tasks: firewall.yml
+
+- name: Hostname
+  ansible.builtin.import_tasks: hostname.yml
+
+- name: Network
+  ansible.builtin.import_tasks: network.yml
+
+- name: Clock and updates
+  ansible.builtin.import_tasks: system.yml
+
+- name: Provider leftovers
+  ansible.builtin.import_tasks: cleanup.yml

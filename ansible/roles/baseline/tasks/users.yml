@@ -1,0 +1,28 @@
+# The admin user: account, sudo password, SSH key.
+
+- name: Create the admin user with its sudo password
+  ansible.builtin.user:
+    name: "{{ admin_user }}"
+    shell: "{{ admin_shell }}"
+    groups: "{{ admin_groups }}"
+    append: true
+    password: "{{ admin_sudo_password | password_hash('sha512', admin_password_salt) }}"
+    update_password: always
+  no_log: true
+
+- name: Create the admin user's .ssh folder
+  ansible.builtin.file:
+    path: "/home/{{ admin_user }}/.ssh"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0700"
+
+# Replaces the whole file: only this key can log in, any other is removed
+- name: Allow only the admin public key
+  ansible.builtin.copy:
+    content: "{{ admin_ssh_public_key }}\n"
+    dest: "/home/{{ admin_user }}/.ssh/authorized_keys"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: "0600"

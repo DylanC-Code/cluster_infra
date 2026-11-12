@@ -1,0 +1,31 @@
+# Leftovers from the provider images.
+
+# Skipped during the first run: Ansible is then connected as ubuntu or
+# root and would cut its own access. The next run, as the admin user, does it.
+- name: Remove bootstrap access
+  when: ansible_user == admin_user
+  block:
+    - name: Remove the provider's default users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: absent
+        remove: true
+      loop: "{{ provider_default_users }}"
+
+    - name: Remove the passwordless sudo rule cloud-init made for them
+      ansible.builtin.file:
+        path: /etc/sudoers.d/90-cloud-init-users
+        state: absent
+
+    - name: Remove SSH keys from root
+      ansible.builtin.file:
+        path: /root/.ssh/authorized_keys
+        state: absent
+
+# A third-party agent running as root and reporting to Hostinger
+- name: Remove Hostinger's monitoring agent
+  ansible.builtin.apt:
+    name: monarx-agent
+    state: absent
+    purge: true
+  when: provider == 'hostinger'

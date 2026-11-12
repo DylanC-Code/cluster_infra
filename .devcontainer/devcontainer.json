@@ -27,7 +27,8 @@
                 "redhat.ansible",
                 "ms-kubernetes-tools.vscode-kubernetes-tools",
                 "timonwong.shellcheck",
-                "editorconfig.editorconfig"
+                "editorconfig.editorconfig",
+                "wholroyd.jinja"
             ],
             "settings": {
                 "vs-kubernetes": {

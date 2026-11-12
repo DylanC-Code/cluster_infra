@@ -10,6 +10,15 @@ alias kga='kubectl get all -A'
 alias kd='kubectl describe'
 alias kl='kubectl logs'
 
+# ---------- Bitwarden Secrets Manager ----------
+# Asks for the Ansible token without showing or recording it.
+# Lives only in this shell: run it again in each new terminal.
+bws_login() {
+  printf 'Bitwarden token (eu1 ansible): '
+  read -rs BWS_ACCESS_TOKEN && export BWS_ACCESS_TOKEN
+  echo
+}
+
 # ---------- API tunnel ----------
 # Added in Phase 3, once the eu1 API is reachable.
 

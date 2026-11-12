@@ -1,0 +1,24 @@
+# IPv4 only: the provider firewalls don't filter IPv6.
+# Network settings stay as the provider set them at install.
+
+# Kernel setting, applied now and at every boot
+- name: Turn off IPv6
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible (baseline role)
+      net.ipv6.conf.all.disable_ipv6 = 1
+      net.ipv6.conf.default.disable_ipv6 = 1
+    dest: /etc/sysctl.d/99_disable_ipv6.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Apply kernel settings
+
+# Without this, cloud-init could rewrite the network config at boot
+- name: Stop cloud-init from managing the network
+  ansible.builtin.copy:
+    content: "network: {config: disabled}\n"
+    dest: /etc/cloud/cloud.cfg.d/99_disable_network_config.cfg
+    owner: root
+    group: root
+    mode: "0644"
