@@ -1,3 +1,4 @@
 # operations
 
-Node maintenance: kured (reboots one node at a time after kernel updates).
+Running the cluster itself: argo_cd (deploys everything from this repo),
+kured (reboots one node at a time after kernel updates).

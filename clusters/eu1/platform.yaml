@@ -1,0 +1,6 @@
+# Platform components running on eu1, one line each: <category>/<component>.
+# bootstrap/platform_appset.yaml turns each line into an Argo CD
+# Application, from platform/<component>/source.yaml and values.yaml,
+# plus values/<component>.yaml if it exists.
+- component: networking/cilium
+- component: operations/argo_cd

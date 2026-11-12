@@ -1,0 +1,55 @@
+# One Argo CD Application per line of clusters/eu1/platform.yaml.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          # Which components run on eu1
+          - git:
+              repoURL: https://github.com/DylanC-Code/cluster_infra.git
+              revision: main
+              files:
+                - path: clusters/eu1/platform.yaml
+          # Each one's chart: repo, chart, version, namespace
+          - git:
+              repoURL: https://github.com/DylanC-Code/cluster_infra.git
+              revision: main
+              files:
+                - path: "platform/{{ .component }}/source.yaml"
+  # Deleting this ApplicationSet must never uninstall the platform
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{ base .component | replace "_" "-" }}'
+    spec:
+      project: default
+      sources:
+        - repoURL: "{{ .repo }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .version }}"
+          helm:
+            releaseName: '{{ base .component | replace "_" "-" }}'
+            valueFiles:
+              - "$values/platform/{{ .component }}/values.yaml"
+              - "$values/clusters/eu1/values/{{ base .component }}.yaml"
+            ignoreMissingValueFiles: true
+        - repoURL: https://github.com/DylanC-Code/cluster_infra.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

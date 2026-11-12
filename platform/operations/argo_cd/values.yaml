@@ -1,0 +1,23 @@
+# Argo CD settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/argo_cd.yaml
+
+# Same resource names whatever the release is called (argocd-server...)
+fullnameOverride: argocd
+
+# ---------- Not used ----------
+# No single sign-on: admin login now, Cloudflare Access in front (Phase 7)
+dex:
+  enabled: false
+# Alerts come from VictoriaMetrics (Phase 9), not from Argo CD
+notifications:
+  enabled: false
+
+# ---------- What Argo CD watches ----------
+configs:
+  cm:
+    # Cilium creates these by the hundreds; Argo CD never deploys them,
+    # so watching them only costs memory
+    resource.exclusions: |
+      - apiGroups: ["cilium.io"]
+        kinds: ["CiliumIdentity", "CiliumEndpoint", "CiliumEndpointSlice"]
+        clusters: ["*"]

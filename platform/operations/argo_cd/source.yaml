@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://argoproj.github.io/argo-helm
+chart: argo-cd
+version: 10.18.0
+namespace: argocd

@@ -5,6 +5,11 @@ gra1 (OVH, Gravelines). All three run the control plane and etcd.
 
 Nodes and admin UIs live on `dylancastor.dev`; apps on their own domains.
 
-Contents are added phase by phase: `bootstrap/` (Cilium first, Argo CD in
-Phase 4), then `platform.yaml`, `apps.yaml` and `values/` as components
-and apps arrive.
+| Path | Holds |
+| --- | --- |
+| `bootstrap/` | `bootstrap.sh` (the only steps run by hand), the root Application, the ApplicationSets |
+| `platform.yaml` | Platform components running on eu1 |
+| `values/` | eu1's settings for each component |
+
+`apps.yaml` arrives with the first app. Bootstrap procedure:
+`runbooks/cluster/bootstrap.md`.

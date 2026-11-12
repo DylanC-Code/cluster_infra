@@ -1,0 +1,23 @@
+# The only Application applied by hand (bootstrap.sh). It keeps this
+# folder's manifests in sync, itself included, and the ApplicationSets
+# here create every other Application.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/DylanC-Code/cluster_infra.git
+    targetRevision: main
+    path: clusters/eu1/bootstrap
+    directory:
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

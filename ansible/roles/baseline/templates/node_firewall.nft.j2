@@ -18,6 +18,8 @@ table inet node_firewall {
 
     # Replies to connections the node opened, and connections already open
     ct state established,related accept
+    # Replies to Cilium's L7 proxy: Cilium turns tracking off for them
+    ct state untracked accept
     ct state invalid drop
 
     # Local traffic, and pod traffic on the interfaces Cilium creates
