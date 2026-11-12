@@ -5,3 +5,8 @@
   ansible.builtin.service:
     name: ssh
     state: reloaded
+
+# Reads every file in /etc/sysctl.d, including ours
+- name: Apply kernel settings
+  ansible.builtin.command: sysctl --system
+  changed_when: true

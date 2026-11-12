@@ -7,3 +7,6 @@
 
 - name: Hostname
   ansible.builtin.import_tasks: hostname.yml
+
+- name: Network
+  ansible.builtin.import_tasks: network.yml
