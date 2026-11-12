@@ -1,0 +1,18 @@
+# k3s on the eu1 nodes: all three are servers (control plane + etcd)
+
+# Same version as the devcontainer's kubectl; checksum from the release's sha256sum-amd64.txt
+k3s_version: v1.37.2+k3s1
+k3s_sha256: 265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda
+
+# The node that creates the cluster; the others join it.
+# Rebuilding this node later: point it at another node instead (runbook).
+k3s_init_node: par1
+
+# Bitwarden Secrets Manager IDs (Platform project)
+k3s_token_secret_id: 35ab7afc-0439-4e78-b077-b50000f8715a
+etcd_s3_access_key_id_secret_id: 26e34322-0d1f-48e4-ba20-b50000f8f0d7
+etcd_s3_secret_access_key_secret_id: ecbdc25b-070d-498e-81f5-b50000f9100e
+
+# etcd snapshots to R2 (bucket in the EU jurisdiction: ".eu." in the address)
+etcd_s3_endpoint: 8230cdbf7b705b18dcb44ff42f66f553.eu.r2.cloudflarestorage.com
+etcd_s3_bucket: eu1-etcd

@@ -1,0 +1,26 @@
+# What Kubernetes needs from the kernel, now and after every reboot.
+
+- name: Load the container networking modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+    persistent: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Kernel settings for Kubernetes
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible (k3s_server role)
+      # The node forwards packets between pods and nodes
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      # Many pods watch many files
+      fs.inotify.max_user_instances = 512
+      fs.inotify.max_user_watches = 524288
+    dest: /etc/sysctl.d/90_kubernetes.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Apply k3s kernel settings

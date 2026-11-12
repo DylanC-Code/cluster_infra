@@ -1,0 +1,27 @@
+# Start k3s. Type=notify: "started" returns only once k3s is up,
+# so the next node joins a server that is ready.
+
+- name: Install the k3s service
+  ansible.builtin.copy:
+    src: k3s.service
+    dest: /etc/systemd/system/k3s.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart k3s
+
+# Apply pending changes now (first start included), not at the end of the run
+- name: Apply pending restarts
+  ansible.builtin.meta: flush_handlers
+
+- name: Keep k3s running and started at boot
+  ansible.builtin.systemd_service:
+    name: k3s
+    state: started
+    enabled: true
+
+- name: Wait for the API to answer
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 6443
+    timeout: 120

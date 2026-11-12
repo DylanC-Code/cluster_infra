@@ -1,0 +1,12 @@
+# k3s server on every node. One file per concept.
+- name: Kernel settings
+  ansible.builtin.import_tasks: kernel.yml
+
+- name: K3s binary
+  ansible.builtin.import_tasks: install.yml
+
+- name: K3s configuration
+  ansible.builtin.import_tasks: config.yml
+
+- name: K3s service
+  ansible.builtin.import_tasks: service.yml

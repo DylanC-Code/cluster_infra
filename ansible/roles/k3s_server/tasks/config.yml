@@ -1,0 +1,27 @@
+# The k3s config file. It holds the token and the R2 keys: root only,
+# and never printed by Ansible.
+
+- name: Read the k3s secrets from Bitwarden Secrets Manager
+  ansible.builtin.set_fact:
+    k3s_token: "{{ lookup('community.general.bitwarden_secrets_manager', k3s_token_secret_id).value }}"
+    etcd_s3_access_key_id: "{{ lookup('community.general.bitwarden_secrets_manager', etcd_s3_access_key_id_secret_id).value }}"
+    etcd_s3_secret_access_key: "{{ lookup('community.general.bitwarden_secrets_manager', etcd_s3_secret_access_key_secret_id).value }}"
+  no_log: true
+
+- name: Create the k3s config folder
+  ansible.builtin.file:
+    path: "{{ k3s_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Write the k3s config
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ k3s_config_dir }}/config.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  notify: Restart k3s
