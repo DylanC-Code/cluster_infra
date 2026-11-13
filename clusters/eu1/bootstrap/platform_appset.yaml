@@ -53,3 +53,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+        # The label the platform store serves (external_secrets/config)
+        managedNamespaceMetadata:
+          labels:
+            env: platform
