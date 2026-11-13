@@ -1,0 +1,139 @@
+// Renovate: opens a pull request when a pinned version has a newer release.
+// Each of its PRs runs the repo's checks (tests/run_all.sh) like any other.
+// What it watches: the charts in platform/*/*/source.yaml, the devcontainer
+// tools (.devcontainer/versions.env), the Cilium schema in devcontainer.json,
+// the GitHub Actions, the Ansible collections, k3s (dashboard only).
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices"
+  ],
+  // ---------- When ----------
+  "timezone": "Europe/Paris",
+  "schedule": [
+    "before 7am on monday"
+  ],
+  // A release younger than 3 days waits: most broken releases are pulled by then
+  "minimumReleaseAge": "3 days",
+  // ---------- Versions Renovate can't find on its own ----------
+  "customManagers": [
+    {
+      // Devcontainer tools: the "# renovate:" comment above each version
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.devcontainer/versions\\.env$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( extractVersion=(?<extractVersion>\\S+))?\\n[A-Z0-9_]+=(?<currentValue>\\S+)",
+      ],
+    },
+    {
+      // Platform charts: source.yaml's repo, chart and version (ADR 0004)
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^platform/[^/]+/[^/]+/source\\.yaml$/"
+      ],
+      "matchStrings": [
+        "repo: (?<registryUrl>\\S+)\\nchart: (?<depName>\\S+)\\nversion: (?<currentValue>\\S+)",
+      ],
+      "datasourceTemplate": "helm",
+    },
+    {
+      // Cilium's values schema in the editor: moves with the Cilium chart
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.devcontainer/devcontainer\\.json$/"
+      ],
+      "matchStrings": [
+        "cilium/cilium/v(?<currentValue>[^/]+)/install/kubernetes"
+      ],
+      "datasourceTemplate": "helm",
+      "registryUrlTemplate": "https://helm.cilium.io",
+      "depNameTemplate": "cilium",
+    },
+    {
+      // k3s, set per cluster in the Ansible inventory
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^ansible/inventories/[^/]+/group_vars/[^/]+\\.yaml$/"
+      ],
+      "matchStrings": [
+        "k3s_version: (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "k3s-io/k3s",
+      "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\+k3s(?<build>\\d+)$",
+    },
+  ],
+  // ---------- How updates are grouped and merged ----------
+  // Majors are never grouped: each gets its own PR.
+  // Later rules override earlier ones.
+  "packageRules": [
+    {
+      "description": "Platform charts, the Cilium schema with them: wait for a merge by hand",
+      "matchDatasources": [
+        "helm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "platform charts",
+    },
+    {
+      "description": "Devcontainer tools: patches merge themselves once green",
+      "matchFileNames": [
+        ".devcontainer/versions.env"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "devcontainer tools",
+    },
+    {
+      "matchFileNames": [
+        ".devcontainer/versions.env"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true,
+    },
+    {
+      "description": "GitHub Actions: patches and digest updates merge themselves once green",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "ci actions",
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "digest",
+        "pinDigest"
+      ],
+      "automerge": true,
+    },
+    {
+      "description": "Ansible collections",
+      "matchManagers": [
+        "ansible-galaxy"
+      ],
+      "groupName": "ansible collections",
+    },
+    {
+      "description": "k3s and kubectl move together, in a drill started by hand (dashboard only)",
+      "matchDepNames": [
+        "k3s-io/k3s",
+        "kubernetes/kubernetes"
+      ],
+      "groupName": "k3s and kubectl",
+      "dependencyDashboardApproval": true,
+      "automerge": false,
+    },
+  ],
+}
