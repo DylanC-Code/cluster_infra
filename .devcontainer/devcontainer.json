@@ -44,7 +44,8 @@
         "terminal.integrated.defaultProfile.linux": "zsh",
         "files.associations": {
           "**/ansible/**/*.yml": "ansible",
-          "**/ansible/**/*.yaml": "ansible"
+          "**/ansible/**/*.yaml": "ansible",
+          "**/renovate.json5": "jsonc"
         },
         "ansible.python.interpreterPath": "/opt/python_tools/bin/python",
         "ansible.ansible.path": "/opt/python_tools/bin/ansible",
