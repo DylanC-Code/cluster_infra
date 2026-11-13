@@ -4,3 +4,4 @@
 # plus values/<component>.yaml if it exists.
 - component: networking/cilium
 - component: operations/argo_cd
+- component: security/cert_manager

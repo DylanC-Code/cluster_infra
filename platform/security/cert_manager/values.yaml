@@ -1,0 +1,12 @@
+# cert-manager settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/cert_manager.yaml
+
+# The chart installs cert-manager's resource definitions, and keeps them
+# if it's ever removed: deleting them would delete every certificate
+crds:
+  enabled: true
+  keep: true
+
+# Metrics exposed now, scraped once VictoriaMetrics arrives (Phase 9)
+prometheus:
+  enabled: true
