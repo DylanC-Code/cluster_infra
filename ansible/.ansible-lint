@@ -1,0 +1,2 @@
+# ansible-lint settings: the strictest built-in profile.
+profile: production

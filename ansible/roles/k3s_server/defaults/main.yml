@@ -1,6 +1,6 @@
-k3s_binary: /usr/local/bin/k3s
-k3s_config_dir: /etc/rancher/k3s
+k3s_server_binary: /usr/local/bin/k3s
+k3s_server_config_dir: /etc/rancher/k3s
 
 # Snapshots: every 6 hours, 20 kept (5 days), locally and on R2
-etcd_snapshot_schedule: "0 */6 * * *"
-etcd_snapshot_retention: 20
+k3s_server_snapshot_schedule: "0 */6 * * *"
+k3s_server_snapshot_retention: 20

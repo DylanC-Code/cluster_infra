@@ -7,7 +7,7 @@ tls-san:
   - {{ ansible_host }}
 
 # ---------- Joining the cluster ----------
-token: {{ k3s_token }}
+token: {{ k3s_server_token }}
 {% if inventory_hostname == k3s_init_node %}
 # This node created the cluster (only used on its very first start)
 cluster-init: true
@@ -29,12 +29,12 @@ disable:
 disable-helm-controller: true
 
 # ---------- etcd snapshots: local and on R2 ----------
-etcd-snapshot-schedule-cron: "{{ etcd_snapshot_schedule }}"
-etcd-snapshot-retention: {{ etcd_snapshot_retention }}
+etcd-snapshot-schedule-cron: "{{ k3s_server_snapshot_schedule }}"
+etcd-snapshot-retention: {{ k3s_server_snapshot_retention }}
 etcd-s3: true
 etcd-s3-endpoint: {{ etcd_s3_endpoint }}
 etcd-s3-region: auto
 etcd-s3-bucket: {{ etcd_s3_bucket }}
 etcd-s3-folder: {{ inventory_hostname }}
-etcd-s3-access-key: {{ etcd_s3_access_key_id }}
-etcd-s3-secret-key: {{ etcd_s3_secret_access_key }}
+etcd-s3-access-key: {{ k3s_server_s3_key_id }}
+etcd-s3-secret-key: {{ k3s_server_s3_secret_key }}

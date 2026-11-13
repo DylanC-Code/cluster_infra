@@ -7,6 +7,8 @@
     "features": {
         "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
+    "initializeCommand": "mkdir -p \"$HOME/.config/gh\" && touch \"$HOME/.config/gh/devcontainer.env\"",
+    "runArgs": ["--env-file", "${localEnv:HOME}/.config/gh/devcontainer.env"],
     "mounts": [
         "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh_host,type=bind,readonly",
         "source=cluster_infra_eu1_kube,target=/home/vscode/.kube,type=volume"
@@ -14,7 +16,8 @@
     "remoteEnv": {
         "HELM_CONFIG_HOME": "${containerWorkspaceFolder}/.helm/config",
         "HELM_CACHE_HOME": "${containerWorkspaceFolder}/.helm/cache",
-        "HELM_DATA_HOME": "${containerWorkspaceFolder}/.helm/data"
+        "HELM_DATA_HOME": "${containerWorkspaceFolder}/.helm/data",
+        "ANSIBLE_CONFIG": "${containerWorkspaceFolder}/ansible/ansible.cfg"
     },
     "postStartCommand": {
         "ssh": "bash .devcontainer/setup_ssh.sh",
@@ -35,7 +38,34 @@
                     "vs-kubernetes.kubectl-path": "/usr/local/bin/kubectl",
                     "vs-kubernetes.helm-path": "/usr/local/bin/helm"
                 },
-                "terminal.integrated.defaultProfile.linux": "zsh"
+                "terminal.integrated.defaultProfile.linux": "zsh",
+
+                "files.associations": {
+                    "**/ansible/**/*.yml": "ansible",
+                    "**/ansible/**/*.yaml": "ansible"
+                },
+                "ansible.python.interpreterPath": "/opt/python_tools/bin/python",
+                "ansible.ansible.path": "/opt/python_tools/bin/ansible",
+                "ansible.config.path": "/workspaces/cluster_infra/ansible/ansible.cfg",
+                "ansible.validation.enabled": true,
+                "ansible.validation.lint.enabled": true,
+                "ansible.validation.lint.path": "/opt/python_tools/bin/ansible-lint",
+                "ansible.validation.lint.arguments": "-c /workspaces/cluster_infra/ansible/.ansible-lint",
+                "ansible.executionEnvironment.enabled": false,
+                "ansible.lightspeed.enabled": false,
+
+                "yaml.kubernetesCRDStore.enable": true,
+                "yaml.schemas": {
+                    "kubernetes": [
+                        "clusters/*/bootstrap/*.yaml",
+                        "apps/*/base/*.yaml",
+                        "apps/*/overlays/*/*.yaml"
+                    ],
+                    "https://raw.githubusercontent.com/cilium/cilium/v1.20.4/install/kubernetes/cilium/values.schema.json": [
+                        "platform/networking/cilium/values.yaml",
+                        "clusters/*/values/cilium.yaml"
+                    ]
+                }
             }
         }
     }

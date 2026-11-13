@@ -5,6 +5,7 @@
 *.p12
 *.pfx
 *kubeconfig*
+!ansible/playbooks/kubeconfig.yaml
 .env
 .env.*
 *token*

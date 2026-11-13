@@ -8,32 +8,20 @@
 #   bash clusters/eu1/bootstrap/bootstrap.sh
 # Once Argo CD runs, change things through Git, not by rerunning this.
 set -euo pipefail
+source clusters/_shared/component.sh
 
 cluster=eu1
 
-# One field of a component's source.yaml
-field() {
-  sed -n "s/^$2: //p" "platform/$1/source.yaml"
-}
-
-# Installs a component the way Argo CD manages it afterwards:
-# same release name, chart, version and values files
+# Installs a component exactly as Argo CD manages it afterwards
 install() {
-  local component=$1
-  local name
-  name=$(basename "$component")
-  local args=(--values "platform/$component/values.yaml")
-  local cluster_values="clusters/$cluster/values/$name.yaml"
-  if [[ -f $cluster_values ]]; then
-    args+=(--values "$cluster_values")
-  fi
+  local output
+  output=$(component_helm_args "$cluster" "$1")
+  local args
+  mapfile -t args <<<"$output"
 
-  helm upgrade --install "${name//_/-}" "$(field "$component" chart)" \
+  helm upgrade --install "${args[@]}" \
     --kube-context "$cluster" \
-    --repo "$(field "$component" repo)" \
-    --version "$(field "$component" version)" \
-    --namespace "$(field "$component" namespace)" --create-namespace \
-    "${args[@]}" \
+    --create-namespace \
     --wait --timeout 10m
 }
 

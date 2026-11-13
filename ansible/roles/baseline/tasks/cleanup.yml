@@ -10,7 +10,7 @@
         name: "{{ item }}"
         state: absent
         remove: true
-      loop: "{{ provider_default_users }}"
+      loop: "{{ baseline_provider_users }}"
 
     - name: Remove the passwordless sudo rule cloud-init made for them
       ansible.builtin.file:

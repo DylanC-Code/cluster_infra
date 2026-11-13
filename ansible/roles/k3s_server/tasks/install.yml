@@ -3,7 +3,7 @@
 - name: Download k3s
   ansible.builtin.get_url:
     url: "https://github.com/k3s-io/k3s/releases/download/{{ k3s_version | urlencode }}/k3s"
-    dest: "{{ k3s_binary }}"
+    dest: "{{ k3s_server_binary }}"
     checksum: "sha256:{{ k3s_sha256 }}"
     owner: root
     group: root
@@ -13,7 +13,7 @@
 # kubectl and the container tools on the node, for debugging
 - name: Link the tools bundled in k3s
   ansible.builtin.file:
-    src: "{{ k3s_binary }}"
+    src: "{{ k3s_server_binary }}"
     dest: "/usr/local/bin/{{ item }}"
     state: link
   loop:
