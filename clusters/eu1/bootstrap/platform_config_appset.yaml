@@ -1,0 +1,64 @@
+# One Argo CD Application per platform component of clusters/eu1/platform.yaml
+# that has a config/ folder: the extra manifests installed with it.
+# Named <component>-config, in the component's namespace, synced after the
+# chart's Application has created the resource types they use.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-config
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          # Which components run on eu1, each with its source.yaml
+          # (for its namespace): the platform ApplicationSet's own list
+          - matrix:
+              generators:
+                - git:
+                    repoURL: https://github.com/DylanC-Code/cluster_infra.git
+                    revision: main
+                    files:
+                      - path: clusters/eu1/platform.yaml
+                - git:
+                    repoURL: https://github.com/DylanC-Code/cluster_infra.git
+                    revision: main
+                    files:
+                      - path: "platform/{{ .component }}/source.yaml"
+          # Only those with a config/ folder
+          - git:
+              repoURL: https://github.com/DylanC-Code/cluster_infra.git
+              revision: main
+              directories:
+                - path: "platform/{{ .component }}/config"
+  # Deleting this ApplicationSet must never remove what it installed
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{ base .component | replace "_" "-" }}-config'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/DylanC-Code/cluster_infra.git
+        targetRevision: main
+        path: "platform/{{ .component }}/config"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+        # On a new cluster the chart may not have created its resource
+        # types yet: try again rather than stay failed
+        retry:
+          limit: 10
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 10m

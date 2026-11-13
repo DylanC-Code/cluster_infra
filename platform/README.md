@@ -29,8 +29,12 @@ Every `platform/<category>/<component>/` has exactly (ADR 0004):
 
 ## How a component gets installed
 
-A cluster lists it in `clusters/<name>/platform.yaml`. The cluster's
-ApplicationSet then creates an Argo CD Application named after the folder
-(dashes instead of underscores). That Application installs the chart from
-`source.yaml` with `values.yaml`, then `clusters/<name>/values/<component>.yaml`
-if that file exists.
+A cluster lists it in `clusters/<name>/platform.yaml`. Two ApplicationSets
+of the cluster then create:
+
+- the Application `<component>` (folder name, dashes instead of
+  underscores): the chart from `source.yaml`, with `values.yaml`, then
+  `clusters/<name>/values/<component>.yaml` if that file exists;
+- the Application `<component>-config`, only when the component has a
+  `config/` folder: its manifests, in the component's namespace, retried
+  until the chart has created the resource types they use.
