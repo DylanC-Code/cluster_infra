@@ -31,8 +31,13 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-        # Labels read by the guardrails (Phase 6)
+        # Labels read by the guardrails: app and env by the stores and
+        # Kyverno; pod-security by Kubernetes itself, which refuses any pod
+        # below the Restricted standard (no root, no privilege escalation,
+        # every capability dropped, seccomp on)
         managedNamespaceMetadata:
           labels:
             app: '{{ .app | replace "_" "-" }}'
             env: "{{ .env }}"
+            pod-security.kubernetes.io/enforce: restricted
+            pod-security.kubernetes.io/enforce-version: latest

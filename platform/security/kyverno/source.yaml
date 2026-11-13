@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://kyverno.github.io/kyverno
+chart: kyverno
+version: 3.9.2
+namespace: kyverno

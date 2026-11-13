@@ -6,3 +6,4 @@
 - component: operations/argo_cd
 - component: security/cert_manager
 - component: security/external_secrets
+- component: security/kyverno
