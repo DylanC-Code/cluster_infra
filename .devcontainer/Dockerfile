@@ -2,9 +2,9 @@ FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
 # System packages the tools and scripts need
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      dnsutils netcat-openbsd unzip python3-venv \
- && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends \
+  dnsutils netcat-openbsd unzip python3-venv \
+  && rm -rf /var/lib/apt/lists/*
 
 # Versions and install scripts: one script per family of tools
 COPY versions.env /tmp/devcontainer/versions.env
@@ -14,8 +14,9 @@ RUN bash /tmp/devcontainer/install/kubernetes_tools.sh
 RUN bash /tmp/devcontainer/install/cluster_tools.sh
 RUN bash /tmp/devcontainer/install/validation_tools.sh
 RUN bash /tmp/devcontainer/install/bitwarden.sh
+RUN bash /tmp/devcontainer/install/github.sh
 RUN bash /tmp/devcontainer/install/python_tools.sh \
- && rm -rf /tmp/devcontainer
+  && rm -rf /tmp/devcontainer
 
 # Ansible tools live in their own virtual environment
 ENV PATH="/opt/python_tools/bin:${PATH}"
