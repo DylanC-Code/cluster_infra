@@ -1,0 +1,10 @@
+# External Secrets settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/external_secrets.yaml
+
+# The chart installs the resource definitions (ExternalSecret, stores...)
+installCRDs: true
+
+# Bitwarden's SDK server, which External Secrets talks to over HTTPS.
+# Its certificate (Secret bitwarden-tls-certs) comes from config/.
+bitwarden-sdk-server:
+  enabled: true

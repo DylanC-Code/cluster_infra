@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://charts.external-secrets.io
+chart: external-secrets
+version: 2.14.0
+namespace: external-secrets
