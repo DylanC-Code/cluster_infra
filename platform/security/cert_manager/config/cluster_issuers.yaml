@@ -1,0 +1,18 @@
+# The cluster's internal certificate authority, in two issuers:
+#   selfsigned  signs one certificate only: the authority's own (certificates.yaml)
+#   internal-ca signs every internal certificate with that authority
+# Workloads ask internal-ca, never selfsigned.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: internal-ca
+spec:
+  ca:
+    secretName: internal-ca

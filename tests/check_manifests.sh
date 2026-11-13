@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Every manifest Argo CD applies renders, and matches its schema:
 #   - the bootstrap manifests of each cluster (Argo CD's own resources included)
-#   - each platform component, rendered with each cluster's values
+#   - each platform component, rendered with each cluster's values,
+#     and the extra manifests of its config/ folder
 #   - each app overlay
 # Run from the repo root: bash tests/check_manifests.sh
 set -euo pipefail
@@ -55,6 +56,9 @@ for cluster_dir in clusters/*/; do
     else
       echo "--- $cluster: $component did not render"
       failed=1
+    fi
+    if [[ -d platform/$component/config ]]; then
+      validate "$cluster: $component config" "platform/$component/config"/*.yaml
     fi
   done
 done

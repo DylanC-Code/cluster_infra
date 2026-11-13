@@ -1,0 +1,21 @@
+# The internal certificate authority: a key and a certificate kept in the
+# Secret internal-ca, in cert-manager's namespace, where the internal-ca
+# issuer reads it. Renewed by cert-manager before it expires.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: internal-ca
+spec:
+  isCA: true
+  commonName: internal-ca
+  secretName: internal-ca
+  duration: 87600h # 10 years
+  renewBefore: 720h # 30 days
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: selfsigned
