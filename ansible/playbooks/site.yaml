@@ -31,7 +31,7 @@
 
 # One node at a time, in inventory order: par1 creates the cluster,
 # then waw1 and gra1 join it (etcd adds its members one by one)
-- name: k3s servers
+- name: Set up the k3s servers
   hosts: eu1_servers
   gather_facts: false
   become: true

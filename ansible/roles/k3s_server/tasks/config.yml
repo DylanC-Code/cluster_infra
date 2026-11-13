@@ -2,15 +2,17 @@
 # and never printed by Ansible.
 
 - name: Read the k3s secrets from Bitwarden Secrets Manager
+  vars:
+    k3s_server_lookup: community.general.bitwarden_secrets_manager
   ansible.builtin.set_fact:
-    k3s_token: "{{ lookup('community.general.bitwarden_secrets_manager', k3s_token_secret_id).value }}"
-    etcd_s3_access_key_id: "{{ lookup('community.general.bitwarden_secrets_manager', etcd_s3_access_key_id_secret_id).value }}"
-    etcd_s3_secret_access_key: "{{ lookup('community.general.bitwarden_secrets_manager', etcd_s3_secret_access_key_secret_id).value }}"
+    k3s_server_token: "{{ lookup(k3s_server_lookup, k3s_token_secret_id).value }}"
+    k3s_server_s3_key_id: "{{ lookup(k3s_server_lookup, etcd_s3_access_key_id_secret_id).value }}"
+    k3s_server_s3_secret_key: "{{ lookup(k3s_server_lookup, etcd_s3_secret_access_key_secret_id).value }}"
   no_log: true
 
 - name: Create the k3s config folder
   ansible.builtin.file:
-    path: "{{ k3s_config_dir }}"
+    path: "{{ k3s_server_config_dir }}"
     state: directory
     owner: root
     group: root
@@ -19,7 +21,7 @@
 - name: Write the k3s config
   ansible.builtin.template:
     src: config.yaml.j2
-    dest: "{{ k3s_config_dir }}/config.yaml"
+    dest: "{{ k3s_server_config_dir }}/config.yaml"
     owner: root
     group: root
     mode: "0600"

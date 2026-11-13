@@ -11,4 +11,4 @@ Installed once by hand with `clusters/<name>/bootstrap/bootstrap.sh`, then
 manages itself (Application `argo-cd`).
 
 Web UI: `kargo`, then https://localhost:8080, user `admin`
-(Bitwarden: `eu1 · Argo CD · admin`). Behind Cloudflare Access from Phase 7.
+(Bitwarden: `<cluster> · Argo CD · admin`). Behind Cloudflare Access from Phase 7.

@@ -3,10 +3,10 @@
 - name: Create the admin user with its sudo password
   ansible.builtin.user:
     name: "{{ admin_user }}"
-    shell: "{{ admin_shell }}"
-    groups: "{{ admin_groups }}"
+    shell: "{{ baseline_admin_shell }}"
+    groups: "{{ baseline_admin_groups }}"
     append: true
-    password: "{{ admin_sudo_password | password_hash('sha512', admin_password_salt) }}"
+    password: "{{ admin_sudo_password | password_hash('sha512', baseline_password_salt) }}"
     update_password: always
   no_log: true
 
