@@ -34,8 +34,7 @@
         "ms-kubernetes-tools.vscode-kubernetes-tools",
         "timonwong.shellcheck",
         "editorconfig.editorconfig",
-        "wholroyd.jinja",
-        "github.vscode-github-actions"
+        "wholroyd.jinja"
       ],
       "settings": {
         "vs-kubernetes": {
