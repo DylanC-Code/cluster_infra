@@ -1,0 +1,7 @@
+# Kyverno settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/kyverno.yaml
+
+# The webhook that checks resources: 3 copies, since when none answers,
+# Kubernetes refuses changes in the namespaces it checks
+admissionController:
+  replicas: 3
