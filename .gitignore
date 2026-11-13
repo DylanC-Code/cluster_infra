@@ -9,8 +9,10 @@
 .env
 .env.*
 *token*
+!clusters/*/bootstrap/bitwarden_tokens.sh
 *secret*.yaml
 !**/external_secret*.yaml
+!platform/security/external_secrets/config/cluster_secret_stores.yaml
 *.tfstate*
 
 # Local tool state
