@@ -15,8 +15,9 @@ alias ktunnel='ssh -fN eu1-api'
 alias ktunnel_stop='pkill -f "ssh -fN eu1-api"'
 
 # ---------- Web UIs (port-forwards, Ctrl+C to close) ----------
-# Argo CD: https://localhost:8080
-alias kargo='kubectl -n argocd port-forward svc/argocd-server 8080:443'
+# Argo CD (break-glass; normally https://argocd-eu1.dylancastor.dev):
+# http://localhost:8080
+alias kargo='kubectl -n argocd port-forward svc/argocd-server 8080:80'
 # Hubble: http://localhost:12000
 alias khubble='cilium hubble ui --open-browser=false'
 alias kgrafana='kubectl -n monitoring port-forward svc/monitoring-grafana 3000:80'

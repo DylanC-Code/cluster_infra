@@ -13,20 +13,23 @@ source clusters/_shared/component.sh
 
 cluster=eu1
 
-# Installs a component exactly as Argo CD manages it afterwards
+# Installs a component as Argo CD manages it afterwards, plus any extra
+# Helm arguments: install <component> [helm args...]
 install() {
   local output
   output=$(component_helm_args "$cluster" "$1")
   local args
   mapfile -t args <<<"$output"
 
-  helm upgrade --install "${args[@]}" \
+  helm upgrade --install "${args[@]}" "${@:2}" \
     --kube-context "$cluster" \
     --create-namespace \
     --wait --timeout 10m
 }
 
 install networking/cilium
-install operations/argo_cd
+# Without its HTTPRoute: the Gateway API types don't exist yet (traefik's
+# config installs them). Argo CD adds the route itself once they do.
+install operations/argo_cd --set server.httproute.enabled=false
 kubectl --context "$cluster" apply -f "clusters/$cluster/bootstrap/root.yaml"
 bash "clusters/$cluster/bootstrap/bitwarden_tokens.sh"

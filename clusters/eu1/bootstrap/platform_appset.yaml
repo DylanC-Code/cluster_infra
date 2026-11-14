@@ -53,6 +53,15 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+        # On a new cluster, a chart may use types another component
+        # installs (Argo CD's HTTPRoute, from traefik's config): try again
+        # rather than stay failed
+        retry:
+          limit: 10
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 10m
         # The label the platform store serves (external_secrets/config)
         managedNamespaceMetadata:
           labels:
