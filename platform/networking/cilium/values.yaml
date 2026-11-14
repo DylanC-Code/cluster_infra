@@ -30,6 +30,10 @@ operator:
   rollOutPods: true
   prometheus:
     enabled: true
+  # A drain (kured, an upgrade) never stops both copies at once
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 1
 
 # ---------- Metrics ----------
 # Exposed now, scraped once VictoriaMetrics arrives (Phase 9)
