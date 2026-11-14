@@ -1,0 +1,9 @@
+# The namespace the policy test cases are checked in: an app namespace, as
+# the apps ApplicationSet labels it (app website, environment staging)
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Values
+namespaceSelector:
+  - name: website-staging
+    labels:
+      app: website
+      env: staging
