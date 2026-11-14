@@ -50,7 +50,7 @@ automatically. Rules, in order:
 
 OVH Control Panel → Network → Public IP addresses → the node's IP →
 Edge Network Firewall. Up to 20 rules, priorities 0 to 19, the first match
-wins. Stateless: replies to outgoing traffic need their own rules (3, 5, 6).
+wins. Stateless: replies to outgoing traffic need their own rules (3, 5 to 8).
 
 Only par1 needs rules: traffic between waw1 and gra1 never leaves the
 OVHcloud network, so this firewall doesn't see it.
@@ -64,9 +64,11 @@ OVHcloud network, so this firewall doesn't see it.
 | 4 | Authorise | ICMP | all | |
 | 5 | Authorise | UDP | all | source 53 (DNS replies) |
 | 6 | Authorise | UDP | all | source 123 (NTP replies) |
+| 7 | Authorise | UDP | 198.41.192.0/24 | source 7844 (Cloudflare Tunnel, QUIC replies) |
+| 8 | Authorise | UDP | 198.41.200.0/24 | source 7844 (Cloudflare Tunnel, QUIC replies) |
 | 19 | Refuse | IPv4 | all | |
 
-Priorities 7 to 18 stay free for later rules.
+Priorities 9 to 18 stay free for later rules.
 
 Make sure the firewall is **Active**: rules on a disabled firewall only
 apply during a DDoS attack.
@@ -98,6 +100,12 @@ A port can only be tested for real while something listens on it.
 
 ## Later
 
-- Phase 7: cloudflared is forced to use TCP (HTTP/2), so its replies pass
-  OVH's "established" rule; QUIC replies (UDP 7844) would be dropped.
 - Changing a node's IP means updating both layers.
+
+## Cloudflare Tunnel (Phase 7)
+
+cloudflared connects out to Cloudflare on port 7844, QUIC (UDP) first,
+HTTP/2 (TCP) if QUIC fails. Hostinger and nftables pass the replies on
+their own (stateful). OVH needs rules 7 and 8: UDP has no "established"
+state, and without them every QUIC reply is dropped. The two ranges are
+Cloudflare's tunnel addresses (region1 and region2.v2.argotunnel.com).
