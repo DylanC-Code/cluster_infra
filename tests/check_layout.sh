@@ -5,6 +5,7 @@
 #   - every line of platform.yaml, apps.yaml and every values file points
 #     to something that exists
 #   - names are snake_case
+#   - nothing sits outside the repo's known top-level folders and files
 # Run from the repo root: bash tests/check_layout.sh
 set -euo pipefail
 shopt -s nullglob
@@ -69,6 +70,14 @@ for cluster_dir in clusters/*/; do
   done < <(paste -d' ' <(sed -n 's/^- app: //p' "${cluster_dir}apps.yaml") \
                        <(sed -n 's/^ *env: //p' "${cluster_dir}apps.yaml"))
 done
+
+# ---------- Top level: only the known folders and files ----------
+# A typo in a path (latform/...) would otherwise escape every check above
+top_level=".devcontainer .editorconfig .github .gitignore .yamllint.yaml README.md
+  ansible apps clusters docs platform runbooks tests"
+while read -r entry; do
+  [[ " ${top_level//$'\n'/ } " == *" $entry "* ]] || fail "$entry: not a known top-level folder or file"
+done < <(git ls-files --cached --others --exclude-standard | cut -d/ -f1 | sort -u)
 
 # ---------- Names: snake_case files and folders ----------
 # Dot files and the names tools impose (README.md, Kubernetes manifests'
