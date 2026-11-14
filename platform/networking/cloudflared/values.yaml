@@ -1,0 +1,72 @@
+# cloudflared settings shared by every cluster, for bjw-s's app-template.
+# Cluster-specific ones: clusters/<name>/values/cloudflared.yaml
+# (the Bitwarden key of the cluster's tunnel token)
+
+# Every resource is named cloudflared, not cloudflared-app-template
+global:
+  fullnameOverride: cloudflared
+
+controllers:
+  cloudflared:
+    # One connector per node: the tunnel keeps working with any node down
+    type: daemonset
+    # A new version replaces the connectors one node at a time
+    strategy: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+    pod:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+    containers:
+      cloudflared:
+        image:
+          repository: docker.io/cloudflare/cloudflared
+          tag: 2026.10.7
+        # The image runs "cloudflared --no-autoupdate". The tunnel is
+        # managed in Cloudflare: its routes live there (one wildcard per
+        # domain, to Traefik), the token in the environment says which tunnel
+        args:
+          - tunnel
+          - --metrics=0.0.0.0:2000
+          - run
+        # TUNNEL_TOKEN, read from Bitwarden (externalSecrets below)
+        envFrom:
+          - externalSecretRef:
+              identifier: tunnel
+        # /ready answers 200 once this connector is connected to Cloudflare
+        probes:
+          liveness: &ready
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ready
+                port: 2000
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              failureThreshold: 3
+          readiness: *ready
+        resources:
+          requests:
+            cpu: 20m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: [ALL]
+
+# The Secret cloudflared, with one key: TUNNEL_TOKEN. Which Bitwarden key
+# holds it is the cluster's (its own tunnel): clusters/<name>/values/
+externalSecrets:
+  tunnel:
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: platform
+    refreshInterval: 1h

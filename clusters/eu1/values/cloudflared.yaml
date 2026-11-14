@@ -1,0 +1,8 @@
+# eu1's cloudflared settings. Shared ones: platform/networking/cloudflared/values.yaml
+externalSecrets:
+  tunnel:
+    data:
+      # The token of the tunnel eu1 (Cloudflare Zero Trust, Networks, Tunnels)
+      - secretKey: TUNNEL_TOKEN
+        remoteRef:
+          key: eu1_cloudflared_tunnel_token
