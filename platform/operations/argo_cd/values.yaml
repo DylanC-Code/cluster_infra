@@ -5,15 +5,27 @@
 fullnameOverride: argocd
 
 # ---------- Not used ----------
-# No single sign-on: admin login now, Cloudflare Access in front (Phase 7)
+# No single sign-on: admin login, behind Cloudflare Access
 dex:
   enabled: false
 # Alerts come from VictoriaMetrics (Phase 9), not from Argo CD
 notifications:
   enabled: false
 
-# ---------- What Argo CD watches ----------
+# ---------- Web UI ----------
+# Plain HTTP: Cloudflare's edge ends TLS, Traefik routes the hostname
+# (clusters/<name>/values/argo_cd.yaml) to argocd-server
+server:
+  httproute:
+    enabled: true
+    parentRefs:
+      - name: traefik
+        namespace: traefik
+
 configs:
+  params:
+    server.insecure: true
+  # ---------- What Argo CD watches ----------
   cm:
     # Cilium creates these by the hundreds; Argo CD never deploys them,
     # so watching them only costs memory

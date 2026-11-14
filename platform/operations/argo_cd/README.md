@@ -10,5 +10,11 @@ Applications.
 Installed once by hand with `clusters/<name>/bootstrap/bootstrap.sh`, then
 manages itself (Application `argo-cd`).
 
-Web UI: `kargo`, then https://localhost:8080, user `admin`
-(Bitwarden: `<cluster> · Argo CD · admin`). Behind Cloudflare Access from Phase 7.
+Web UI: at the hostname of `clusters/<name>/values/argo_cd.yaml`, behind
+Cloudflare Access, then user `admin` (Bitwarden: `<cluster> · Argo CD ·
+admin`). It serves plain HTTP: Cloudflare's edge ends TLS, Traefik routes
+to it (HTTPRoute `argocd-server`).
+Break-glass, without Cloudflare: `kargo`, then http://localhost:8080.
+
+Bootstrap installs it without its HTTPRoute (the Gateway API types come
+later, with traefik); Argo CD adds the route once they exist.

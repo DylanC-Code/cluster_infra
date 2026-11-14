@@ -1,0 +1,8 @@
+# eu1's Argo CD settings. Shared ones: platform/operations/argo_cd/values.yaml
+# Its web UI, behind Cloudflare Access (*.dylancastor.dev)
+global:
+  domain: argocd-eu1.dylancastor.dev
+server:
+  httproute:
+    hostnames:
+      - argocd-eu1.dylancastor.dev
