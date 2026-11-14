@@ -1,0 +1,28 @@
+# kured settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/kured.yaml
+
+configuration:
+  # ---------- When ----------
+  timeZone: Europe/Paris
+  startTime: "03:00"
+  endTime: "06:00"
+  # Every 5 minutes: 3 nodes must fit in the 3-hour window
+  period: 5m
+
+  # ---------- One node at a time ----------
+  concurrency: 1
+  # Keep the lock 5 minutes after the node is back: etcd and Cilium settle
+  lockReleaseDelay: 5m
+  # A lock never released (a node that never came back) frees after 1 hour
+  lockTtl: 1h
+
+  # ---------- Draining ----------
+  # Give up a drain after 15 minutes, never force: the node goes back in
+  # service and is retried at the next check
+  drainTimeout: 15m
+  forceReboot: false
+  # New pods avoid a node about to reboot
+  preferNoScheduleTaint: weave.works/kured-node-reboot
+
+  # Each node shows whether a reboot is pending or in progress
+  annotateNodes: true

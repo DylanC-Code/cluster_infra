@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://kubereboot.github.io/charts
+chart: kured
+version: 6.1.0
+namespace: kured
