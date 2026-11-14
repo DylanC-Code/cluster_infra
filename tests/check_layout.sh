@@ -3,7 +3,7 @@
 #   - platform/ has only the five categories, each component its contract
 #   - each app and each cluster has exactly its contract
 #   - every line of platform.yaml, apps.yaml and every values file points
-#     to something that exists
+#     to something that exists, and every app size is in the size table
 #   - names are snake_case
 #   - nothing sits outside the repo's known top-level folders and files
 # Run from the repo root: bash tests/check_layout.sh
@@ -52,6 +52,9 @@ for app in apps/*/; do
 done
 
 # ---------- clusters/ ----------
+# The app sizes, read from the table they are defined in
+sizes=$(sed -n 's/^ *"\([a-z]*\)": *{"cpu".*/\1/p' \
+  platform/security/kyverno/config/generating_policies.yaml | tr '\n' ' ')
 for cluster_dir in clusters/*/; do
   cluster=$(basename "$cluster_dir")
   [[ $cluster == _* ]] && continue
@@ -69,6 +72,9 @@ for cluster_dir in clusters/*/; do
     [[ -d apps/$app/overlays/$env ]] || fail "${cluster_dir}apps.yaml: no apps/$app/overlays/$env"
   done < <(paste -d' ' <(sed -n 's/^- app: //p' "${cluster_dir}apps.yaml") \
                        <(sed -n 's/^ *env: //p' "${cluster_dir}apps.yaml"))
+  for size in $(sed -n 's/^ *size: //p' "${cluster_dir}apps.yaml"); do
+    [[ " $sizes " == *" $size "* ]] || fail "${cluster_dir}apps.yaml: size $size is not one of: $sizes"
+  done
 done
 
 # ---------- Top level: only the known folders and files ----------

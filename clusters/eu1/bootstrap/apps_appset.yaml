@@ -32,12 +32,14 @@ spec:
         syncOptions:
           - CreateNamespace=true
         # Labels read by the guardrails: app and env by the stores and
-        # Kyverno; pod-security by Kubernetes itself, which refuses any pod
-        # below the Restricted standard (no root, no privilege escalation,
-        # every capability dropped, seccomp on)
+        # Kyverno; size by Kyverno's quotas (small when the line has none);
+        # pod-security by Kubernetes itself, which refuses any pod below the
+        # Restricted standard (no root, no privilege escalation, every
+        # capability dropped, seccomp on)
         managedNamespaceMetadata:
           labels:
             app: '{{ .app | replace "_" "-" }}'
             env: "{{ .env }}"
+            size: '{{ dig "size" "small" . }}'
             pod-security.kubernetes.io/enforce: restricted
             pod-security.kubernetes.io/enforce-version: latest

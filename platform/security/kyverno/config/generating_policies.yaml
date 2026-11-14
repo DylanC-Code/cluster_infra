@@ -4,6 +4,10 @@
 #   nothing else, in or out. An app opens what it needs (another
 #   destination, the internet) with a NetworkPolicy of its own, in its
 #   folder: NetworkPolicies add up, they never take away.
+#   app-size, container-defaults: the namespace's CPU, memory and pod
+#   ceiling, from its size (the table below; chosen per app in
+#   clusters/<name>/apps.yaml), and the defaults of a container that sets
+#   none (a debug pod; Deployments must still set theirs).
 apiVersion: policies.kyverno.io/v1
 kind: GeneratingPolicy
 metadata:
@@ -60,3 +64,66 @@ spec:
         }]
   generate:
     - expression: generator.apply(variables.namespace, variables.policy)
+---
+apiVersion: policies.kyverno.io/v1
+kind: GeneratingPolicy
+metadata:
+  name: size-app-namespaces
+spec:
+  matchConstraints:
+    objectSelector:
+      matchExpressions:
+        - key: env
+          operator: In
+          values: [staging, prod]
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [namespaces]
+  evaluation:
+    synchronize:
+      enabled: true
+    generateExisting:
+      enabled: true
+  variables:
+    # ---------- The size table: the one place sizes are defined ----------
+    # An app picks its size in clusters/<name>/apps.yaml (small if none).
+    - name: sizes
+      expression: >-
+        {
+          "small":  {"cpu": "500m", "memory": "512Mi", "memoryLimit": "1Gi", "pods": "10"},
+          "medium": {"cpu": "1",    "memory": "1Gi",   "memoryLimit": "2Gi", "pods": "15"},
+          "large":  {"cpu": "2",    "memory": "2Gi",   "memoryLimit": "4Gi", "pods": "20"}
+        }
+    - name: namespace
+      expression: object.metadata.name
+    - name: size
+      expression: variables.sizes[object.metadata.?labels[?'size'].orValue('small')]
+    - name: resources
+      expression: >-
+        [
+          {
+            "apiVersion": dyn("v1"),
+            "kind": dyn("ResourceQuota"),
+            "metadata": dyn({"name": "app-size", "namespace": variables.namespace}),
+            "spec": dyn({"hard": {
+              "requests.cpu": variables.size.cpu,
+              "requests.memory": variables.size.memory,
+              "limits.memory": variables.size.memoryLimit,
+              "pods": variables.size.pods
+            }})
+          },
+          {
+            "apiVersion": dyn("v1"),
+            "kind": dyn("LimitRange"),
+            "metadata": dyn({"name": "container-defaults", "namespace": variables.namespace}),
+            "spec": dyn({"limits": [{
+              "type": "Container",
+              "defaultRequest": {"cpu": "50m", "memory": "64Mi"},
+              "default": {"memory": "128Mi"}
+            }]})
+          }
+        ]
+  generate:
+    - expression: generator.apply(variables.namespace, variables.resources)
