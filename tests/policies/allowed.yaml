@@ -1,5 +1,14 @@
 # What an app may deploy: each resource passes every Kyverno rule
 # (tests/check_policies.sh)
+# An app namespace: gets its default-isolation NetworkPolicy
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: website-staging
+  labels:
+    app: website
+    env: staging
+---
 apiVersion: v1
 kind: Pod
 metadata:

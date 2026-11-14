@@ -1,0 +1,62 @@
+# Generated in every app namespace (env=staging or env=prod), and kept in
+# sync: deleted or edited, Kyverno puts it back.
+#   default-isolation: the namespace's pods reach each other and DNS, and
+#   nothing else, in or out. An app opens what it needs (another
+#   destination, the internet) with a NetworkPolicy of its own, in its
+#   folder: NetworkPolicies add up, they never take away.
+apiVersion: policies.kyverno.io/v1
+kind: GeneratingPolicy
+metadata:
+  name: isolate-app-namespaces
+spec:
+  matchConstraints:
+    objectSelector:
+      matchExpressions:
+        - key: env
+          operator: In
+          values: [staging, prod]
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [namespaces]
+  evaluation:
+    synchronize:
+      enabled: true
+    generateExisting:
+      enabled: true
+  variables:
+    - name: namespace
+      expression: object.metadata.name
+    - name: policy
+      expression: >-
+        [{
+          "apiVersion": dyn("networking.k8s.io/v1"),
+          "kind": dyn("NetworkPolicy"),
+          "metadata": dyn({
+            "name": "default-isolation",
+            "namespace": variables.namespace
+          }),
+          "spec": dyn({
+            "podSelector": dyn({}),
+            "policyTypes": dyn(["Ingress", "Egress"]),
+            "ingress": dyn([
+              {"from": [{"podSelector": {}}]}
+            ]),
+            "egress": dyn([
+              dyn({"to": [{"podSelector": {}}]}),
+              dyn({
+                "to": [{
+                  "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "kube-system"}},
+                  "podSelector": {"matchLabels": {"k8s-app": "kube-dns"}}
+                }],
+                "ports": [
+                  dyn({"protocol": "UDP", "port": 53}),
+                  dyn({"protocol": "TCP", "port": 53})
+                ]
+              })
+            ])
+          })
+        }]
+  generate:
+    - expression: generator.apply(variables.namespace, variables.policy)
