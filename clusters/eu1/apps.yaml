@@ -1,7 +1,11 @@
-# Apps running on eu1, one line per app and environment:
+# Apps running on eu1, one entry per app and environment:
 #   - app: website
-#     env: staging
-# bootstrap/apps_appset.yaml turns each line into an Argo CD Application
+#     env: prod
+#     size: medium
+# size is optional: small when left out. The sizes (CPU, memory, pods)
+# are defined in one table: platform/security/kyverno/config/
+# generating_policies.yaml.
+# bootstrap/apps_appset.yaml turns each entry into an Argo CD Application
 # named <app>-<env>, built from apps/<app>/overlays/<env>/, in its own
 # namespace <app>-<env>. Empty until the first app (the website).
 []
