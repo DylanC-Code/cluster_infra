@@ -8,8 +8,8 @@ namespaces are not checked: their charts come from upstream.
 
 It also generates, in every app namespace:
 - the NetworkPolicy default-isolation: the namespace's pods reach each
-  other and DNS, nothing else. An app opens more with a NetworkPolicy of
-  its own.
+  other and DNS, nothing else; only Traefik and the namespace's own pods
+  reach them. An app opens more with a NetworkPolicy of its own.
 - its quota (app-size) and container defaults, from the app's size:
   small, medium or large, defined in one table in
   `config/generating_policies.yaml`, chosen in `clusters/<name>/apps.yaml`.

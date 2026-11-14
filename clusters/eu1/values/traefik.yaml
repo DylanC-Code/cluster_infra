@@ -1,0 +1,8 @@
+# eu1's Traefik settings. Shared ones: platform/networking/traefik/values.yaml
+ports:
+  web:
+    # Requests arrive from cloudflared pods (eu1's pod range, cilium.yaml):
+    # keep the visitor's address they forward in X-Forwarded-For
+    forwardedHeaders:
+      trustedIPs:
+        - 10.42.0.0/16
