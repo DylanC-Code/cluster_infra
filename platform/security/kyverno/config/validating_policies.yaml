@@ -1,0 +1,99 @@
+# Kyverno's rules for app namespaces (env=staging or env=prod), refused on
+# failure. Platform namespaces are never checked. Each rule is also applied
+# to Deployments, StatefulSets, Jobs and CronJobs, so a bad pod template is
+# refused when it is applied, not later when its pods are created.
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-resources
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - key: env
+          operator: In
+          values: [staging, prod]
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, jobs, cronjobs]
+  variables:
+    - name: containers
+      expression: object.spec.containers + object.spec.?initContainers.orValue([])
+  validations:
+    - expression: >-
+        variables.containers.all(c,
+          c.?resources.?requests.?cpu.hasValue() &&
+          c.?resources.?requests.?memory.hasValue() &&
+          c.?resources.?limits.?memory.hasValue())
+      message: >-
+        Every container must set resources.requests.cpu,
+        resources.requests.memory and resources.limits.memory.
+---
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-labels
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - key: env
+          operator: In
+          values: [staging, prod]
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, jobs, cronjobs]
+  validations:
+    - expression: >-
+        object.metadata.?labels[?'app.kubernetes.io/name'].orValue('') != ''
+      message: Every pod must carry the label app.kubernetes.io/name (what it is, e.g. web).
+    - expression: >-
+        object.metadata.?labels[?'app.kubernetes.io/part-of'].orValue('') ==
+        namespaceObject.metadata.labels['app']
+      messageExpression: >-
+        'Every pod must carry the label app.kubernetes.io/part-of: ' +
+        namespaceObject.metadata.labels['app'] + ', the app of its namespace.'
+---
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: restrict-secret-keys
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - key: env
+          operator: In
+          values: [staging, prod]
+    resourceRules:
+      - apiGroups: [external-secrets.io]
+        apiVersions: ["*"]
+        operations: [CREATE, UPDATE]
+        resources: [externalsecrets]
+  variables:
+    # Bitwarden keys are snake_case: the app website reads website_*
+    - name: prefix
+      expression: namespaceObject.metadata.labels['app'].replace('-', '_') + '_'
+  validations:
+    - expression: size(object.spec.?dataFrom.orValue([])) == 0
+      message: >-
+        dataFrom is not allowed: it reads every key of the Bitwarden project.
+        List each key under data instead.
+    - expression: >-
+        object.spec.?data.orValue([]).all(d, d.remoteRef.key.startsWith(variables.prefix))
+      messageExpression: >-
+        'An app may only read its own Bitwarden keys: each remoteRef.key must start with ' +
+        variables.prefix

@@ -9,6 +9,7 @@ checks=(
   check_file_length
   check_lint
   check_manifests
+  check_policies
 )
 
 failed=()

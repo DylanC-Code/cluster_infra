@@ -1,0 +1,50 @@
+# What an app may deploy: each resource passes every Kyverno rule
+# (tests/check_policies.sh)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+  namespace: website-staging
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: website
+spec:
+  containers:
+    - name: web
+      image: example
+      resources:
+        requests: { cpu: 10m, memory: 32Mi }
+        limits: { memory: 64Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: website-staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: web
+        app.kubernetes.io/part-of: website
+    spec:
+      containers:
+        - name: web
+          image: example
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 64Mi }
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: database
+  namespace: website-staging
+spec:
+  secretStoreRef: { kind: ClusterSecretStore, name: staging }
+  data:
+    - secretKey: password
+      remoteRef: { key: website_database_password }

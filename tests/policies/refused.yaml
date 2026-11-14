@@ -1,0 +1,92 @@
+# What an app may not deploy: each resource breaks at least one Kyverno
+# rule (tests/check_policies.sh)
+# No CPU or memory settings
+apiVersion: v1
+kind: Pod
+metadata:
+  name: no-resources
+  namespace: website-staging
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: website
+spec:
+  containers:
+    - name: web
+      image: example
+---
+# No app.kubernetes.io/name label
+apiVersion: v1
+kind: Pod
+metadata:
+  name: no-name-label
+  namespace: website-staging
+  labels:
+    app.kubernetes.io/part-of: website
+spec:
+  containers:
+    - name: web
+      image: example
+      resources:
+        requests: { cpu: 10m, memory: 32Mi }
+        limits: { memory: 64Mi }
+---
+# Claims to be part of another app
+apiVersion: v1
+kind: Pod
+metadata:
+  name: other-app
+  namespace: website-staging
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: personal-hub
+spec:
+  containers:
+    - name: web
+      image: example
+      resources:
+        requests: { cpu: 10m, memory: 32Mi }
+        limits: { memory: 64Mi }
+---
+# A Deployment whose pods would be refused: refused itself
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bad-template
+  namespace: website-staging
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: web
+    spec:
+      containers:
+        - name: web
+          image: example
+---
+# Another app's Bitwarden key
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: other-key
+  namespace: website-staging
+spec:
+  secretStoreRef: { kind: ClusterSecretStore, name: staging }
+  data:
+    - secretKey: password
+      remoteRef: { key: personal_hub_database_password }
+---
+# Every key of the project at once
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: every-key
+  namespace: website-staging
+spec:
+  secretStoreRef: { kind: ClusterSecretStore, name: staging }
+  dataFrom:
+    - find:
+        name:
+          regexp: ".*"
