@@ -2,7 +2,8 @@
 # Every manifest Argo CD applies renders, and matches its schema:
 #   - the bootstrap manifests of each cluster (Argo CD's own resources included)
 #   - each platform component, rendered with each cluster's values,
-#     and the extra manifests of its config/ folder
+#     and the extra manifests of its config/ folder (kustomize-built
+#     when it has a kustomization.yaml)
 #   - each app overlay
 # Run from the repo root: bash tests/check_manifests.sh
 set -euo pipefail
@@ -43,6 +44,25 @@ render_component() {
   helm template "${args[@]}" --kube-version "$kube_version"
 }
 
+# Validates a component's config/ folder, if it has one, as Argo CD reads
+# it: built by kustomize when it holds a kustomization.yaml (only what it
+# lists is applied), each file as it is otherwise.
+# validate_config <cluster> <component>
+validate_config() {
+  local config=platform/$2/config
+  if [[ -f $config/kustomization.yaml ]]; then
+    local rendered
+    if rendered=$(kustomize build "$config"); then
+      validate "$1: $2 config" <<<"$rendered"
+    else
+      echo "--- $1: $2 config did not build"
+      failed=1
+    fi
+  elif [[ -d $config ]]; then
+    validate "$1: $2 config" "$config"/*.yaml
+  fi
+}
+
 for cluster_dir in clusters/*/; do
   cluster=$(basename "$cluster_dir")
   # Folders starting with _ hold shared files, not a cluster
@@ -57,9 +77,7 @@ for cluster_dir in clusters/*/; do
       echo "--- $cluster: $component did not render"
       failed=1
     fi
-    if [[ -d platform/$component/config ]]; then
-      validate "$cluster: $component config" "platform/$component/config"/*.yaml
-    fi
+    validate_config "$cluster" "$component"
   done
 done
 

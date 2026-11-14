@@ -1,0 +1,19 @@
+# The entry every HTTPRoute attaches to:
+#   parentRefs: [{name: traefik, namespace: traefik}]
+# Plain HTTP: its only client is cloudflared, inside the cluster.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: traefik
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: web
+      # Traefik's web entry point (values.yaml)
+      port: 8000
+      protocol: HTTP
+      # Routes may come from any namespace. What reaches the cluster at all
+      # is decided outside it: the tunnel, DNS and Cloudflare Access
+      allowedRoutes:
+        namespaces:
+          from: All

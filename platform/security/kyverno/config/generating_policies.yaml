@@ -1,9 +1,10 @@
 # Generated in every app namespace (env=staging or env=prod), and kept in
 # sync: deleted or edited, Kyverno puts it back.
 #   default-isolation: the namespace's pods reach each other and DNS, and
-#   nothing else, in or out. An app opens what it needs (another
-#   destination, the internet) with a NetworkPolicy of its own, in its
-#   folder: NetworkPolicies add up, they never take away.
+#   nothing else; only their own namespace and Traefik (the web entry)
+#   reach them. An app opens what it needs (another destination, the
+#   internet) with a NetworkPolicy of its own, in its folder:
+#   NetworkPolicies add up, they never take away.
 #   app-size, container-defaults: the namespace's CPU, memory and pod
 #   ceiling, from its size (the table below; chosen per app in
 #   clusters/<name>/apps.yaml), and the defaults of a container that sets
@@ -45,7 +46,13 @@ spec:
             "podSelector": dyn({}),
             "policyTypes": dyn(["Ingress", "Egress"]),
             "ingress": dyn([
-              {"from": [{"podSelector": {}}]}
+              dyn({"from": [{"podSelector": {}}]}),
+              dyn({
+                "from": [{
+                  "namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "traefik"}},
+                  "podSelector": {"matchLabels": {"app.kubernetes.io/name": "traefik"}}
+                }]
+              })
             ]),
             "egress": dyn([
               dyn({"to": [{"podSelector": {}}]}),

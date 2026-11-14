@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://traefik.github.io/charts
+chart: traefik
+version: 42.3.0
+namespace: traefik

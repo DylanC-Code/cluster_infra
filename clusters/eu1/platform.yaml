@@ -3,6 +3,7 @@
 # Application, from platform/<component>/source.yaml and values.yaml,
 # plus values/<component>.yaml if it exists.
 - component: networking/cilium
+- component: networking/traefik
 - component: operations/argo_cd
 - component: operations/kured
 - component: security/cert_manager

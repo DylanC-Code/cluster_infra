@@ -1,0 +1,11 @@
+# Installed after Traefik's chart (platform-config ApplicationSet):
+# the Gateway API types, then the GatewayClass and the Gateway every
+# HTTPRoute attaches to.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # The standard Gateway API types. The Traefik chart no longer ships them:
+  # its release notes say which version it needs
+  - https://github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.6.3
+  - gateway_classes.yaml
+  - gateways.yaml

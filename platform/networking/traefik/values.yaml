@@ -1,0 +1,54 @@
+# Traefik settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/traefik.yaml
+
+# ---------- Copies: one per node ----------
+deployment:
+  replicas: 3
+# Copies spread over the nodes: never two on one node while another has none
+topologySpreadConstraints:
+  - labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: traefik
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+# A drain (kured, an upgrade) never stops more than one copy at once
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+# ---------- Routing: Gateway API only ----------
+# Routes are HTTPRoutes; Traefik's own IngressRoutes and Ingresses are off,
+# so there is one way to expose something
+providers:
+  kubernetesGateway:
+    enabled: true
+  kubernetesCRD:
+    enabled: false
+  kubernetesIngress:
+    enabled: false
+ingressClass:
+  enabled: false
+# The GatewayClass and the Gateway live in config/, with the Gateway API
+# types they need (this chart no longer ships them)
+gateway:
+  enabled: false
+gatewayClass:
+  enabled: false
+
+# ---------- Entry point ----------
+# Only cloudflared calls Traefik, from inside the cluster: plain HTTP on the
+# web entry point (port 8000, Service port 80). Cloudflare holds the public
+# certificates, WireGuard encrypts traffic between nodes. No HTTPS entry point.
+ports:
+  websecure: null
+service:
+  spec:
+    type: ClusterIP
