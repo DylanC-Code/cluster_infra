@@ -69,6 +69,36 @@ spec:
 apiVersion: policies.kyverno.io/v1
 kind: ValidatingPolicy
 metadata:
+  name: require-priority
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchExpressions:
+        - key: env
+          operator: In
+          values: [staging, prod]
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods]
+  autogen:
+    podControllers:
+      controllers: [deployments, statefulsets, jobs, cronjobs]
+  variables:
+    # The class of the namespace's environment (priority_classes.yaml)
+    - name: priority
+      expression: "'app-' + namespaceObject.metadata.labels['env']"
+  validations:
+    - expression: object.spec.?priorityClassName.orValue('') == variables.priority
+      messageExpression: >-
+        'Every pod must set priorityClassName: ' + variables.priority +
+        ', the priority of its environment.'
+---
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
   name: restrict-secret-keys
 spec:
   validationActions: [Deny]
