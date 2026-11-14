@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/name: web
     app.kubernetes.io/part-of: website
 spec:
+  priorityClassName: app-staging
   containers:
     - name: web
       image: example
@@ -23,6 +24,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: website
 spec:
+  priorityClassName: app-staging
   containers:
     - name: web
       image: example
@@ -40,6 +42,7 @@ metadata:
     app.kubernetes.io/name: web
     app.kubernetes.io/part-of: personal-hub
 spec:
+  priorityClassName: app-staging
   containers:
     - name: web
       image: example
@@ -62,6 +65,7 @@ spec:
       labels:
         app.kubernetes.io/name: web
     spec:
+      priorityClassName: app-staging
       containers:
         - name: web
           image: example
@@ -90,3 +94,21 @@ spec:
     - find:
         name:
           regexp: ".*"
+---
+# The priority of another environment (prod, in a staging namespace)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wrong-priority
+  namespace: website-staging
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: website
+spec:
+  priorityClassName: app-prod
+  containers:
+    - name: web
+      image: example
+      resources:
+        requests: { cpu: 10m, memory: 32Mi }
+        limits: { memory: 64Mi }

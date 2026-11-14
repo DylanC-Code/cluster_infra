@@ -1,0 +1,21 @@
+# Who goes first when a node runs short: the platform (no class, priority
+# 0), then prod, then staging. Under pressure Kubernetes evicts the lowest
+# first, and a prod pod may take a staging pod's place; staging never takes
+# anyone's. Each app pod sets the class of its environment
+# (priorityClassName: app-prod or app-staging), checked by
+# validating_policies.yaml.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: app-prod
+value: -100
+preemptionPolicy: PreemptLowerPriority
+description: App pods in prod namespaces. Below the platform, above staging.
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: app-staging
+value: -1000
+preemptionPolicy: Never
+description: App pods in staging namespaces. Lowest; never preempts another pod.

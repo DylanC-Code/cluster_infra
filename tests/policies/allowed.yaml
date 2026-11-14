@@ -18,6 +18,7 @@ metadata:
     app.kubernetes.io/name: web
     app.kubernetes.io/part-of: website
 spec:
+  priorityClassName: app-staging
   containers:
     - name: web
       image: example
@@ -40,6 +41,7 @@ spec:
         app.kubernetes.io/name: web
         app.kubernetes.io/part-of: website
     spec:
+      priorityClassName: app-staging
       containers:
         - name: web
           image: example
