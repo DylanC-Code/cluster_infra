@@ -33,6 +33,7 @@ disable-helm-controller: true
 # ---------- etcd snapshots: local and on R2 ----------
 etcd-snapshot-schedule-cron: "{{ k3s_server_snapshot_schedule }}"
 etcd-snapshot-retention: {{ k3s_server_snapshot_retention }}
+etcd-snapshot-compress: true
 etcd-s3: true
 etcd-s3-endpoint: {{ etcd_s3_endpoint }}
 etcd-s3-region: auto
