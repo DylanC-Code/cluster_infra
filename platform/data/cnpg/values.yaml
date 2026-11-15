@@ -1,0 +1,31 @@
+# CloudNativePG operator settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/cnpg.yaml
+
+# Resources named cnpg, not cnpg-cloudnative-pg
+fullnameOverride: cnpg
+
+# ---------- Copies: two, on different nodes ----------
+# The operator is what promotes a replica when a primary's node is lost.
+# With one copy, on that node, failover would wait about 5 minutes for it
+# to be rescheduled; two copies elect a leader, the other takes over in
+# seconds.
+replicaCount: 2
+topologySpreadConstraints:
+  - labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: cloudnative-pg
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+
+# Memory limit, no CPU limit (the CPU request guarantees its share)
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+# Metrics are scraped from Phase 9 (a PodMonitor needs its types first)
+monitoring:
+  podMonitorEnabled: false

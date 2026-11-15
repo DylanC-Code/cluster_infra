@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://cloudnative-pg.github.io/charts
+chart: cloudnative-pg
+version: 0.29.1
+namespace: cnpg-system
