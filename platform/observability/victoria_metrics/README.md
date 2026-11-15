@@ -16,9 +16,14 @@ Every part survives losing a node: storage replicates itself (2 copies of
 each sample), so it needs no replicated disk. The two agents scrape the
 same targets; duplicates are dropped (one sample per 30 s).
 
-k3s runs etcd, the controller manager and the scheduler in its own
-process: the `k3s_server` role exposes their metrics, scraped at the nodes'
-addresses (`clusters/<name>/values/victoria_metrics.yaml`).
+k3s runs the API server, scheduler, controller manager and kubelet in one
+process, with one shared set of metrics that each of their endpoints serves
+again (~180,000 series each). Each metric is read once: from the API
+server's endpoint, minus the biggest histograms no rule reads; the
+kubelet's keeps only its own. Scraping all four tripled the series count
+(2.2 million) and got vmstorage killed for lack of memory. etcd's own
+metrics come from the nodes' addresses, exposed by the `k3s_server` role
+(`clusters/<name>/values/victoria_metrics.yaml`).
 
 Alert rules: the chart's default set (Kubernetes, nodes, etcd...). Where
 alerts are sent, and the dead man's switch: Phase 9, step 2.

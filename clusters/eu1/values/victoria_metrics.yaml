@@ -6,14 +6,10 @@ vmagent:
     externalLabels:
       cluster: eu1
 
-# k3s's etcd, controller manager and scheduler: the nodes' addresses
+# k3s's etcd metrics: the nodes' addresses
 # (ansible/inventories/eu1/host_vars/: par1, waw1, gra1)
 kubeEtcd:
-  endpoints: &nodes
+  endpoints:
     - 2.24.59.184
     - 146.59.126.75
     - 193.70.85.94
-kubeControllerManager:
-  endpoints: *nodes
-kubeScheduler:
-  endpoints: *nodes
