@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # The only steps applied by hand on eu1, once its nodes run k3s:
 #   1. Cilium: no pod starts without a network plugin, Argo CD included.
-#   2. Argo CD.
-#   3. The root Application: from then on Argo CD manages everything from
+#   2. CoreDNS: k3s's is disabled, and Argo CD needs DNS to reach Git.
+#   3. Argo CD.
+#   4. The root Application: from then on Argo CD manages everything from
 #      Git, Cilium and itself included.
-#   4. The Bitwarden machine tokens External Secrets reads every secret with.
+#   5. The Bitwarden machine tokens External Secrets reads every secret with.
 # Run from the repo root, with the API tunnel open (ktunnel):
 #   bash clusters/eu1/bootstrap/bootstrap.sh
 # Once Argo CD runs, change things through Git, not by rerunning this.
@@ -28,6 +29,7 @@ install() {
 }
 
 install networking/cilium
+install networking/coredns
 # Without its HTTPRoute: the Gateway API types don't exist yet (traefik's
 # config installs them). Argo CD adds the route itself once they do.
 install operations/argo_cd --set server.httproute.enabled=false
