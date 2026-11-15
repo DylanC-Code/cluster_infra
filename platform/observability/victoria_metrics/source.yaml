@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://victoriametrics.github.io/helm-charts
+chart: victoria-metrics-k8s-stack
+version: 0.98.1
+namespace: monitoring

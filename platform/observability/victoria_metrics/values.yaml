@@ -1,0 +1,140 @@
+# VictoriaMetrics settings shared by every cluster: metrics, alert rules,
+# alert routing. Cluster-specific ones: clusters/<name>/values/victoria_metrics.yaml
+# Every part runs 2 copies or more on different nodes: monitoring must
+# survive the node loss it is there to report.
+
+fullnameOverride: vm
+
+# ---------- Storage: every sample on 2 of the 3 nodes ----------
+vmsingle:
+  enabled: false
+vmcluster:
+  enabled: true
+  spec:
+    retentionPeriod: 30d
+    replicationFactor: 2
+    vmstorage:
+      replicaCount: 3
+      storage:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: 10Gi
+      # The two vmagents scrape the same targets: keep one sample per 30 s
+      extraArgs:
+        dedup.minScrapeInterval: 30s
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmstorage
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      podDisruptionBudget:
+        maxUnavailable: 1
+      resources:
+        requests: { cpu: 50m, memory: 192Mi }
+        limits: { memory: 1Gi }
+    vmselect:
+      replicaCount: 2
+      extraArgs:
+        dedup.minScrapeInterval: 30s
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmselect
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      podDisruptionBudget:
+        maxUnavailable: 1
+      resources:
+        requests: { cpu: 50m, memory: 128Mi }
+        limits: { memory: 512Mi }
+    vminsert:
+      replicaCount: 2
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: vminsert
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+      podDisruptionBudget:
+        maxUnavailable: 1
+      resources:
+        requests: { cpu: 50m, memory: 64Mi }
+        limits: { memory: 256Mi }
+
+# ---------- Scraping: two agents, the same targets ----------
+vmagent:
+  spec:
+    replicaCount: 2
+    scrapeInterval: 30s
+    topologySpreadConstraints:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: vmagent
+        maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+    resources:
+      requests: { cpu: 50m, memory: 128Mi }
+      limits: { memory: 512Mi }
+
+# ---------- Alerts: two evaluators, two clustered alertmanagers ----------
+# Each vmalert sends every alert to both alertmanagers; they agree on one
+# notification. Where notifications go: step 2 (Discord).
+vmalert:
+  spec:
+    replicaCount: 2
+    resources:
+      requests: { cpu: 20m, memory: 64Mi }
+      limits: { memory: 256Mi }
+alertmanager:
+  spec:
+    replicaCount: 2
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { memory: 128Mi }
+
+# ---------- What the cluster's own parts expose ----------
+# k3s runs etcd, the controller manager and the scheduler in its own
+# process: scraped at the nodes' addresses (clusters/<name>/values/),
+# exposed by the k3s_server role. Their certificates are k3s's own, not
+# the cluster CA's, hence no verification on those two.
+kubeEtcd:
+  service:
+    port: 2381
+    targetPort: 2381
+  vmScrape:
+    spec:
+      endpoints:
+        - port: http-metrics
+          scheme: http
+kubeControllerManager:
+  vmScrape:
+    spec:
+      endpoints:
+        - port: http-metrics
+          scheme: https
+          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          tlsConfig:
+            insecureSkipVerify: true
+kubeScheduler:
+  vmScrape:
+    spec:
+      endpoints:
+        - port: http-metrics
+          scheme: https
+          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          tlsConfig:
+            insecureSkipVerify: true
+
+# ---------- Later steps ----------
+# Grafana and its dashboards: step 3
+grafana:
+  enabled: false
+defaultDashboards:
+  enabled: false
