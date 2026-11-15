@@ -57,6 +57,7 @@
         "ansible.executionEnvironment.enabled": false,
         "ansible.lightspeed.enabled": false,
         "yaml.kubernetesCRDStore.enable": true,
+        "yaml.format.printWidth": 120,
         "yaml.schemas": {
           "kubernetes": [
             "clusters/*/bootstrap/*.yaml",

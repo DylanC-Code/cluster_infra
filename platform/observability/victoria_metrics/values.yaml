@@ -2,8 +2,9 @@
 # alert routing. Cluster-specific ones: clusters/<name>/values/victoria_metrics.yaml
 # Every part runs 2 copies or more on different nodes: monitoring must
 # survive the node loss it is there to report.
-
 fullnameOverride: vm
+# One copy per node at most, while another node has none (used below)
+x-spread: &spread { maxSkew: 1, topologyKey: kubernetes.io/hostname, whenUnsatisfiable: DoNotSchedule }
 
 # ---------- Storage: every sample on 2 of the 3 nodes ----------
 vmsingle:
@@ -25,15 +26,11 @@ vmcluster:
       extraArgs:
         dedup.minScrapeInterval: 30s
       topologySpreadConstraints:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: vmstorage
-          maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
+        - <<: *spread
+          labelSelector: { matchLabels: { app.kubernetes.io/name: vmstorage } }
       podDisruptionBudget:
         maxUnavailable: 1
-        # VictoriaMetrics sizes its caches from this limit (60 % of it):
+      # VictoriaMetrics sizes its caches from this limit (60 % of it):
       # 768 Mi is plenty for this cluster and keeps the nodes' memory free
       resources:
         requests: { cpu: 50m, memory: 384Mi }
@@ -43,12 +40,8 @@ vmcluster:
       extraArgs:
         dedup.minScrapeInterval: 30s
       topologySpreadConstraints:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: vmselect
-          maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
+        - <<: *spread
+          labelSelector: { matchLabels: { app.kubernetes.io/name: vmselect } }
       podDisruptionBudget:
         maxUnavailable: 1
       resources:
@@ -57,15 +50,10 @@ vmcluster:
     vminsert:
       replicaCount: 2
       topologySpreadConstraints:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: vminsert
-          maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
+        - <<: *spread
+          labelSelector: { matchLabels: { app.kubernetes.io/name: vminsert } }
       podDisruptionBudget:
         maxUnavailable: 1
-      # It buffers samples while a vmstorage is unavailable: room for that
       resources:
         requests: { cpu: 50m, memory: 128Mi }
         limits: { memory: 512Mi }
@@ -76,19 +64,13 @@ vmagent:
     replicaCount: 2
     scrapeInterval: 30s
     topologySpreadConstraints:
-      - labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: vmagent
-        maxSkew: 1
-        topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: DoNotSchedule
+      - <<: *spread
+        labelSelector: { matchLabels: { app.kubernetes.io/name: vmagent } }
     resources:
       requests: { cpu: 50m, memory: 128Mi }
       limits: { memory: 512Mi }
 
 # ---------- Alerts: two evaluators, two clustered alertmanagers ----------
-# Each vmalert sends every alert to both alertmanagers; they agree on one
-# notification. Where notifications go: step 2 (Discord).
 vmalert:
   spec:
     replicaCount: 2
@@ -102,11 +84,55 @@ alertmanager:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { memory: 128Mi }
 
-# ---------- What the cluster's own parts expose ----------
-# k3s runs etcd, the controller manager and the scheduler in its own
-# process: scraped at the nodes' addresses (clusters/<name>/values/),
-# exposed by the k3s_server role. Their certificates are k3s's own, not
-# the cluster CA's, hence no verification on those two.
+# ---------- k3s: one process, one set of metrics ----------
+# k3s runs the API server, scheduler, controller manager and kubelet in one
+# process, sharing one metrics registry: every one of their endpoints serves
+# all of them (~180,000 series each). So each metric is read once:
+# - the API server's endpoint keeps the API server's and the controllers';
+# - the kubelet's keeps only its own (and cAdvisor's, on its own path);
+# - the controller manager and scheduler aren't scraped on their own.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubelet:
+  vmScrape:
+    spec:
+      metricRelabelConfigs:
+        - { action: labeldrop, regex: (uid) }
+        - { action: labeldrop, regex: (id|name) }
+        - { action: drop, source_labels: [__name__], regex: rest_client_request_duration_seconds_(bucket|sum|count) }
+        # The API server's metrics, served again by the kubelet endpoint
+        - { action: drop, source_labels: [__name__], regex: (apiserver|etcd|scheduler|workqueue)_.+ }
+        - { action: drop, source_labels: [__name__], regex: (apiextensions|aggregator|admission|flowcontrol)_.+ }
+        - { action: drop, source_labels: [__name__], regex: (authentication|authorization|watch_cache)_.+ }
+kubeApiServer:
+  vmScrape:
+    spec:
+      endpoints:
+        - port: https
+          scheme: https
+          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            serverName: kubernetes
+          # The biggest histograms, read by no rule (_sum and _count stay);
+          # latency alerts use apiserver_request_sli_duration_seconds, kept
+          metricRelabelConfigs:
+            - action: drop
+              source_labels: [__name__]
+              regex: (etcd_request|apiserver_(request|watch_list|storage_list))_duration_seconds_bucket
+            - action: drop
+              source_labels: [__name__]
+              regex: apiserver_watch_events_dispatch_duration_seconds_bucket
+            - action: drop
+              source_labels: [__name__]
+              regex: apiserver_watch_cache_(read_wait|initialization_duration)_seconds_bucket
+            - action: drop
+              source_labels: [__name__]
+              regex: apiserver_(request_body_size_bytes|response_sizes|watch_events_sizes)_bucket
+
+# etcd: on 2381 (plain HTTP, k3s_server role), at the nodes' addresses
 kubeEtcd:
   service:
     port: 2381
@@ -116,26 +142,7 @@ kubeEtcd:
       endpoints:
         - port: http-metrics
           scheme: http
-kubeControllerManager:
-  vmScrape:
-    spec:
-      endpoints:
-        - port: http-metrics
-          scheme: https
-          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-          tlsConfig:
-            insecureSkipVerify: true
-kubeScheduler:
-  vmScrape:
-    spec:
-      endpoints:
-        - port: http-metrics
-          scheme: https
-          bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-          tlsConfig:
-            insecureSkipVerify: true
 
-# ---------- Later steps ----------
 # Grafana and its dashboards: step 3
 grafana:
   enabled: false

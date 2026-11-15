@@ -31,14 +31,11 @@ disable:
 disable-helm-controller: true
 
 # ---------- Metrics, scraped by VictoriaMetrics ----------
-# etcd on 2381 (plain HTTP), the controller manager on 10257 and the
-# scheduler on 10259 (HTTPS, token). Reachable from the cluster only: the
-# firewalls never accept these ports from outside
+# etcd's own metrics on 2381 (plain HTTP). Reachable from the cluster only:
+# the firewalls never accept this port from outside. The scheduler's and
+# the controller manager's need nothing: k3s serves them with the API
+# server's (one process, one set of metrics)
 etcd-expose-metrics: true
-kube-controller-manager-arg:
-  - bind-address=0.0.0.0
-kube-scheduler-arg:
-  - bind-address=0.0.0.0
 
 # ---------- etcd snapshots: local and on R2 ----------
 etcd-snapshot-schedule-cron: "{{ k3s_server_snapshot_schedule }}"
