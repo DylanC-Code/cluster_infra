@@ -1,0 +1,17 @@
+# Barman Cloud plugin settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/barman_cloud.yaml
+
+# Resources named barman-cloud, not barman-cloud-plugin-barman-cloud
+fullnameOverride: barman-cloud
+
+# Memory limit, no CPU limit (the CPU request guarantees its share)
+resources:
+  requests:
+    cpu: 20m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+# The operator talks to the plugin over mutual TLS: the chart makes its
+# own issuer and certificates with cert-manager (renewed 15 days before
+# their 90 days end)

@@ -2,6 +2,8 @@
 # bootstrap/platform_appset.yaml turns each line into an Argo CD
 # Application, from platform/<component>/source.yaml and values.yaml,
 # plus values/<component>.yaml if it exists.
+- component: data/barman_cloud
+- component: data/cnpg
 - component: networking/cilium
 - component: networking/cloudflared
 - component: networking/coredns
