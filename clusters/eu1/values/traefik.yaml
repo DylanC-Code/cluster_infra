@@ -6,3 +6,52 @@ ports:
     forwardedHeaders:
       trustedIPs:
         - 10.42.0.0/16
+
+# ---------- Admin UIs whose chart makes no HTTPRoute ----------
+# Behind Cloudflare Access, like every *.dylancastor.dev hostname.
+# (Argo CD's route comes from its own chart: values/argo_cd.yaml.)
+extraObjects:
+  # Traefik's dashboard, on its port 8080; / leads to /dashboard/
+  - apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    metadata:
+      name: traefik-dashboard
+      namespace: traefik
+    spec:
+      parentRefs:
+        - name: traefik
+          namespace: traefik
+      hostnames:
+        - traefik-eu1.dylancastor.dev
+      rules:
+        - matches:
+            - path:
+                type: Exact
+                value: /
+          filters:
+            - type: RequestRedirect
+              requestRedirect:
+                scheme: https
+                path:
+                  type: ReplaceFullPath
+                  replaceFullPath: /dashboard/
+                statusCode: 302
+        - backendRefs:
+            - name: traefik
+              port: 8080
+  # Hubble UI (Cilium), in its own namespace, beside its Service
+  - apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    metadata:
+      name: hubble-ui
+      namespace: kube-system
+    spec:
+      parentRefs:
+        - name: traefik
+          namespace: traefik
+      hostnames:
+        - hubble-eu1.dylancastor.dev
+      rules:
+        - backendRefs:
+            - name: hubble-ui
+              port: 80

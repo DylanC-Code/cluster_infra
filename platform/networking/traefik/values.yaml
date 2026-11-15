@@ -49,6 +49,19 @@ gatewayClass:
 # certificates, WireGuard encrypts traffic between nodes. No HTTPS entry point.
 ports:
   websecure: null
+  # The dashboard's port (8080) on the Service too, so an HTTPRoute can
+  # reach it (the route: clusters/<name>/values/traefik.yaml)
+  traefik:
+    expose:
+      default: true
 service:
   spec:
     type: ClusterIP
+
+# ---------- Dashboard ----------
+# Read-only view of the routes and backends Traefik loaded, served on its
+# own port 8080. "insecure": no login of Traefik's; Cloudflare Access is
+# the login, and only a route behind it reaches the port from outside
+api:
+  dashboard: true
+  insecure: true

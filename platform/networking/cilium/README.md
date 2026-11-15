@@ -11,3 +11,6 @@ Depended on by: everything; no pod starts before Cilium is up.
 
 Installed first, by hand: `clusters/<name>/bootstrap/cilium.sh`, which Argo CD then adopts.
 Settings specific to each cluster: `clusters/<name>/values/cilium.yaml`.
+
+Hubble UI's route is in `clusters/<name>/values/traefik.yaml`: Cilium's
+chart makes none.
