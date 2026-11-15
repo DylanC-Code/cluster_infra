@@ -25,8 +25,13 @@ kubelet's keeps only its own. Scraping all four tripled the series count
 metrics come from the nodes' addresses, exposed by the `k3s_server` role
 (`clusters/<name>/values/victoria_metrics.yaml`).
 
-Alert rules: the chart's default set (Kubernetes, nodes, etcd...). Where
-alerts are sent, and the dead man's switch: Phase 9, step 2.
+Alert rules: the chart's default set (Kubernetes, nodes, etcd...).
+Where they go: `config/alertmanager_configs.yaml`. Critical alerts to one
+Discord channel, warnings to another, info alerts nowhere; the always
+firing Watchdog pings healthchecks.io every minute, which alerts from
+outside when the pings stop (the dead man's switch). The addresses are
+secrets: the Secret `alertmanager-receivers`, from Bitwarden, declared in
+`clusters/<name>/values/victoria_metrics.yaml`.
 Grafana and dashboards: Phase 9, step 3.
 
 Depends on: cilium, coredns.

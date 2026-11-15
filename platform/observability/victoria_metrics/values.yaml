@@ -80,6 +80,7 @@ vmalert:
 alertmanager:
   spec:
     replicaCount: 2
+    disableNamespaceMatcher: true # routing: config/, for every namespace
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { memory: 128Mi }
@@ -131,7 +132,6 @@ kubeApiServer:
             - action: drop
               source_labels: [__name__]
               regex: apiserver_(request_body_size_bytes|response_sizes|watch_events_sizes)_bucket
-
 # etcd: on 2381 (plain HTTP, k3s_server role), at the nodes' addresses
 kubeEtcd:
   service:
@@ -142,7 +142,6 @@ kubeEtcd:
       endpoints:
         - port: http-metrics
           scheme: http
-
 # Grafana and its dashboards: step 3
 grafana:
   enabled: false

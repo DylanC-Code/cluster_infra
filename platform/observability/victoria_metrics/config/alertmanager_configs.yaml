@@ -1,0 +1,47 @@
+# Where alerts go. The addresses are secrets (Discord webhooks, the
+# healthchecks.io ping URL): the Secret alertmanager-receivers, read from
+# Bitwarden by an ExternalSecret in clusters/<name>/values/victoria_metrics.yaml.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlertmanagerConfig
+metadata:
+  name: receivers
+spec:
+  route:
+    receiver: discord-warnings
+    group_by: [alertname, namespace]
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 12h
+    routes:
+      # Always firing while alerting works: a ping every minute to
+      # healthchecks.io, which tells you from outside when the pings stop
+      - matchers: [alertname="Watchdog"]
+        receiver: healthchecks
+        group_wait: 0s
+        group_interval: 1m
+        repeat_interval: 1m
+      # Helpers and info alerts: never notified
+      - matchers: [alertname="InfoInhibitor"]
+        receiver: blackhole
+      - matchers: [severity="info"]
+        receiver: blackhole
+      # Needs action now: the channel with notifications on
+      - matchers: [severity="critical"]
+        receiver: discord-critical
+  # A critical alert silences the warning of the same name and namespace
+  inhibit_rules:
+    - source_matchers: [severity="critical"]
+      target_matchers: [severity="warning"]
+      equal: [alertname, namespace]
+  receivers:
+    - name: blackhole
+    - name: healthchecks
+      webhook_configs:
+        - url_secret: { name: alertmanager-receivers, key: healthchecks_url }
+          send_resolved: false
+    - name: discord-critical
+      discord_configs:
+        - webhook_url_secret: { name: alertmanager-receivers, key: discord_critical_url }
+    - name: discord-warnings
+      discord_configs:
+        - webhook_url_secret: { name: alertmanager-receivers, key: discord_warnings_url }

@@ -13,3 +13,29 @@ kubeEtcd:
     - 2.24.59.184
     - 146.59.126.75
     - 193.70.85.94
+
+# The alert receivers' addresses (config/alertmanager_configs.yaml), from
+# Bitwarden: eu1's Discord channels and its healthchecks.io check
+extraObjects:
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: alertmanager-receivers
+      namespace: monitoring
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: platform
+      target:
+        name: alertmanager-receivers
+      data:
+        - secretKey: discord_critical_url
+          remoteRef:
+            key: eu1_alertmanager_discord_critical_url
+        - secretKey: discord_warnings_url
+          remoteRef:
+            key: eu1_alertmanager_discord_warnings_url
+        - secretKey: healthchecks_url
+          remoteRef:
+            key: eu1_alertmanager_healthchecks_url
