@@ -26,6 +26,8 @@ disable-kube-proxy: true
 disable:
   - traefik
   - servicelb
+    # One copy only, not configurable: platform/networking/coredns replaces it
+  - coredns
 disable-helm-controller: true
 
 # ---------- etcd snapshots: local and on R2 ----------

@@ -4,6 +4,7 @@
 # plus values/<component>.yaml if it exists.
 - component: networking/cilium
 - component: networking/cloudflared
+- component: networking/coredns
 - component: networking/traefik
 - component: operations/argo_cd
 - component: operations/kured

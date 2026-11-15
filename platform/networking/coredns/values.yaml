@@ -1,0 +1,39 @@
+# CoreDNS settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/coredns.yaml
+
+# ---------- Names every pod and policy already expects ----------
+# Deployment coredns, Service kube-dns, pods labelled k8s-app: kube-dns
+# (kyverno's default-isolation lets DNS through by that label)
+fullnameOverride: coredns
+k8sAppLabelOverride: kube-dns
+service:
+  name: kube-dns
+
+# ---------- Copies: one per node ----------
+# Every pod resolves names through it: one copy would take the whole
+# cluster's DNS down with its node
+replicaCount: 3
+topologySpreadConstraints:
+  - labelSelector:
+      matchLabels:
+        k8s-app: kube-dns
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+# A drain (kured, an upgrade) never stops more than one copy at once
+podDisruptionBudget:
+  maxUnavailable: 1
+# Scheduled before anything else when a node is short of room
+priorityClassName: system-cluster-critical
+
+# Memory limit, no CPU limit (the CPU request guarantees its share)
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: null
+    memory: 128Mi
+
+# The chart's default server is the one k3s ran: cluster names, then the
+# node's resolvers (/etc/resolv.conf) for everything else, with a cache.
