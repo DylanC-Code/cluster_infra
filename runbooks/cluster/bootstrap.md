@@ -13,8 +13,8 @@ Argo CD manages from Git.
 
     bash clusters/eu1/bootstrap/bootstrap.sh
 
-It installs Cilium, then Argo CD, then applies `root.yaml`, then asks for
-the three Bitwarden machine tokens (vault: Castor / Infra /
+It installs Cilium, then CoreDNS, then Argo CD, then applies `root.yaml`,
+then asks for the three Bitwarden machine tokens (vault: Castor / Infra /
 `Infra/Production/Bootstrap`, the three `eu1 · bws · … reader token
 (external secrets)` items). About 5 minutes.
 
