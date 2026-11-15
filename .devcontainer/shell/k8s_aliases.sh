@@ -15,9 +15,12 @@ alias ktunnel='ssh -fN eu1-api'
 alias ktunnel_stop='pkill -f "ssh -fN eu1-api"'
 
 # ---------- Web UIs (port-forwards, Ctrl+C to close) ----------
-# Argo CD (break-glass; normally https://argocd-eu1.dylancastor.dev):
-# http://localhost:8080
+# Normally at https://<ui>-eu1.dylancastor.dev, behind Cloudflare Access.
+# These reach them without Cloudflare (break-glass).
+# Argo CD: http://localhost:8080
 alias kargo='kubectl -n argocd port-forward svc/argocd-server 8080:80'
+# Traefik dashboard: http://localhost:9000/dashboard/
+alias ktraefik='kubectl -n traefik port-forward svc/traefik 9000:8080'
 # Hubble: http://localhost:12000
 alias khubble='cilium hubble ui --open-browser=false'
 alias kgrafana='kubectl -n monitoring port-forward svc/monitoring-grafana 3000:80'
