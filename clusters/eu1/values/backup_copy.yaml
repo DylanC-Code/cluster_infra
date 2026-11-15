@@ -1,0 +1,27 @@
+# eu1's backup copy settings. Shared ones: platform/data/backup_copy/values.yaml
+controllers:
+  backup-copy:
+    containers:
+      rclone:
+        env:
+          # eu1's R2 buckets (EU jurisdiction) and their B2 twins
+          RCLONE_CONFIG_R2_ENDPOINT: https://8230cdbf7b705b18dcb44ff42f66f553.eu.r2.cloudflarestorage.com
+          COPIES: "eu1-postgres:eu1-postgres-copy eu1-etcd:eu1-etcd-copy"
+
+externalSecrets:
+  keys:
+    data:
+      # R2 token "eu1-backup-copy-read": Object Read on eu1-postgres and eu1-etcd
+      - secretKey: RCLONE_CONFIG_R2_ACCESS_KEY_ID
+        remoteRef:
+          key: eu1_backup_copy_r2_access_key_id
+      - secretKey: RCLONE_CONFIG_R2_SECRET_ACCESS_KEY
+        remoteRef:
+          key: eu1_backup_copy_r2_secret_access_key
+      # B2 application key "eu1-backup-copy"
+      - secretKey: RCLONE_CONFIG_B2_ACCOUNT
+        remoteRef:
+          key: eu1_backup_copy_b2_key_id
+      - secretKey: RCLONE_CONFIG_B2_KEY
+        remoteRef:
+          key: eu1_backup_copy_b2_application_key

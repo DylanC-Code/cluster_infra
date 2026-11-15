@@ -1,0 +1,81 @@
+# Backup copy settings shared by every cluster, for bjw-s's app-template.
+# Cluster-specific ones: clusters/<name>/values/backup_copy.yaml
+# (which buckets to copy, the R2 address, the Bitwarden keys)
+
+# Every resource is named backup-copy, not backup-copy-app-template
+global:
+  fullnameOverride: backup-copy
+
+controllers:
+  backup-copy:
+    type: cronjob
+    cronjob:
+      # Every hour, off the hour
+      schedule: "17 * * * *"
+      concurrencyPolicy: Forbid
+      backoffLimit: 2
+      activeDeadlineSeconds: 3000
+      successfulJobsHistory: 3
+      failedJobsHistory: 3
+    pod:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+    containers:
+      rclone:
+        image:
+          repository: docker.io/rclone/rclone
+          tag: 1.75.2
+        # "copy", never "sync": a file deleted in R2 (retention, or an
+        # attacker) is never deleted in B2. COPIES lists the pairs,
+        # "<R2 bucket>:<B2 bucket>", in the cluster's values.
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -eu
+            for pair in $COPIES; do
+              echo "r2:${pair%%:*} -> b2:${pair##*:}"
+              rclone copy "r2:${pair%%:*}" "b2:${pair##*:}" \
+                --fast-list --stats-one-line --stats-log-level NOTICE --stats 10m
+            done
+        # The remotes, read by rclone from its environment; the keys come
+        # from Bitwarden (externalSecrets below)
+        env:
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+          RCLONE_CONFIG_B2_TYPE: b2
+          HOME: /tmp
+        envFrom:
+          - externalSecretRef:
+              identifier: keys
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: [ALL]
+
+# rclone's scratch space (the root filesystem is read-only)
+persistence:
+  tmp:
+    type: emptyDir
+    globalMounts:
+      - path: /tmp
+
+# The Secret backup-copy: the R2 read key and the B2 key, as rclone's
+# variables. Which Bitwarden keys hold them is the cluster's
+externalSecrets:
+  keys:
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: platform
+    refreshInterval: 1h
