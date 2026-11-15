@@ -4,6 +4,20 @@
 # Resources named barman-cloud, not barman-cloud-plugin-barman-cloud
 fullnameOverride: barman-cloud
 
+# ---------- Copies: two, on different nodes ----------
+# The operator asks the plugin before acting on any database that uses it,
+# a failover included: with one copy, on the lost node, no failover runs
+# (found by the failover test). Every copy serves the operator's calls;
+# only the ObjectStore reconciliation runs on the elected leader.
+replicaCount: 2
+topologySpreadConstraints:
+  - labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: plugin-barman-cloud
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+
 # Memory limit, no CPU limit (the CPU request guarantees its share)
 resources:
   requests:
