@@ -9,6 +9,7 @@
 - component: networking/cloudflared
 - component: networking/coredns
 - component: networking/traefik
+- component: observability/victoria_metrics
 - component: operations/argo_cd
 - component: operations/kured
 - component: security/cert_manager
