@@ -33,9 +33,11 @@ vmcluster:
           whenUnsatisfiable: DoNotSchedule
       podDisruptionBudget:
         maxUnavailable: 1
+        # VictoriaMetrics sizes its caches from this limit (60 % of it):
+      # 768 Mi is plenty for this cluster and keeps the nodes' memory free
       resources:
-        requests: { cpu: 50m, memory: 192Mi }
-        limits: { memory: 1Gi }
+        requests: { cpu: 50m, memory: 384Mi }
+        limits: { memory: 768Mi }
     vmselect:
       replicaCount: 2
       extraArgs:
@@ -63,9 +65,10 @@ vmcluster:
           whenUnsatisfiable: DoNotSchedule
       podDisruptionBudget:
         maxUnavailable: 1
+      # It buffers samples while a vmstorage is unavailable: room for that
       resources:
-        requests: { cpu: 50m, memory: 64Mi }
-        limits: { memory: 256Mi }
+        requests: { cpu: 50m, memory: 128Mi }
+        limits: { memory: 512Mi }
 
 # ---------- Scraping: two agents, the same targets ----------
 vmagent:
