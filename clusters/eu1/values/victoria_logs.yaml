@@ -1,0 +1,12 @@
+# eu1's VictoriaLogs settings. Shared ones: platform/observability/victoria_logs/values.yaml
+
+# Its two copies on par1 and gra1: waw1 has the least memory free
+server:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values: [waw1]
