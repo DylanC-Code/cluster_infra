@@ -11,6 +11,12 @@ Grafana's sidecars load. The VictoriaLogs plugin is downloaded from
 grafana.com at each start. A dashboard changed in the UI is lost at the
 next restart: change it in Git.
 
+Its home page is its own dashboard, the cluster overview
+(`config/overview.dashboard.json`): nodes, alerts and pods at a glance,
+each node's CPU, memory and disk, recent restarts, and log lines that
+mention an error. To change it: edit it in Grafana, export it as JSON
+(Share, Export), replace the file, commit (ADR 0006).
+
 One copy, no database: its own state (users, preferences) is a SQLite file
 in the pod. After a node loss it restarts elsewhere within minutes with
 every dashboard, having only forgotten preferences. Alerting doesn't go
