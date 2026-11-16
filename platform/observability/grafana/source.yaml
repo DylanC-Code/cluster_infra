@@ -1,0 +1,5 @@
+# This component's chart, read by Argo CD and the bootstrap script.
+repo: https://grafana-community.github.io/helm-charts
+chart: grafana
+version: 14.4.0
+namespace: monitoring

@@ -117,21 +117,11 @@ kubeApiServer:
           tlsConfig:
             caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             serverName: kubernetes
-          # The biggest histograms, read by no rule (_sum and _count stay);
-          # latency alerts use apiserver_request_sli_duration_seconds, kept
+          # Every API server and etcd-client histogram but the one the latency
+          # alerts use: the biggest series, read by no rule (_sum and _count stay)
           metricRelabelConfigs:
             - action: drop
-              source_labels: [__name__]
-              regex: (etcd_request|apiserver_(request|watch_list|storage_list))_duration_seconds_bucket
-            - action: drop
-              source_labels: [__name__]
-              regex: apiserver_watch_events_dispatch_duration_seconds_bucket
-            - action: drop
-              source_labels: [__name__]
-              regex: apiserver_watch_cache_(read_wait|initialization_duration)_seconds_bucket
-            - action: drop
-              source_labels: [__name__]
-              regex: apiserver_(request_body_size_bytes|response_sizes|watch_events_sizes)_bucket
+              if: '{__name__=~"(apiserver|etcd)_.+_bucket", __name__!="apiserver_request_sli_duration_seconds_bucket"}'
 # etcd: on 2381 (plain HTTP, k3s_server role), at the nodes' addresses
 kubeEtcd:
   service:
@@ -142,8 +132,18 @@ kubeEtcd:
       endpoints:
         - port: http-metrics
           scheme: http
-# Grafana and its dashboards: step 3
+
+# ---------- Node exporter: instance = the node's name, not its IP ----------
+prometheus-node-exporter:
+  vmScrape:
+    spec:
+      endpoints:
+        - port: metrics
+          relabelConfigs:
+            - { action: replace, source_labels: [__meta_kubernetes_pod_node_name], target_label: instance }
+          metricRelabelConfigs:
+            - { action: drop, source_labels: [mountpoint], regex: /var/lib/kubelet/pods.+ }
+# Grafana is observability/grafana: this chart only gives its data source and dashboards
 grafana:
   enabled: false
-defaultDashboards:
-  enabled: false
+  forceDeployDatasource: true

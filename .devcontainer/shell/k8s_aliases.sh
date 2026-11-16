@@ -23,7 +23,7 @@ alias kargo='kubectl -n argocd port-forward svc/argocd-server 8080:80'
 alias ktraefik='kubectl -n traefik port-forward svc/traefik 9000:8080'
 # Hubble: http://localhost:12000
 alias khubble='cilium hubble ui --open-browser=false'
-alias kgrafana='kubectl -n monitoring port-forward svc/monitoring-grafana 3000:80'
+alias kgrafana='kubectl -n monitoring port-forward svc/grafana 3000:80'
 
 # ---------- Bitwarden Secrets Manager ----------
 # Asks for the Ansible token without showing or recording it.
