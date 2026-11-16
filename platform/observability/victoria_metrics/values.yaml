@@ -66,6 +66,9 @@ vmagent:
     topologySpreadConstraints:
       - <<: *spread
         labelSelector: { matchLabels: { app.kubernetes.io/name: vmagent } }
+    # The busiest node's k3s endpoints outgrew the 16 MiB default (k3s,
+    # below): the samples dropped after reading still count against it
+    extraArgs: { promscrape.maxScrapeSize: 64MiB }
     resources:
       requests: { cpu: 50m, memory: 128Mi }
       limits: { memory: 512Mi }
@@ -92,10 +95,8 @@ alertmanager:
 # - the API server's endpoint keeps the API server's and the controllers';
 # - the kubelet's keeps only its own (and cAdvisor's, on its own path);
 # - the controller manager and scheduler aren't scraped on their own.
-kubeControllerManager:
-  enabled: false
-kubeScheduler:
-  enabled: false
+kubeControllerManager: { enabled: false }
+kubeScheduler: { enabled: false }
 kubelet:
   vmScrape:
     spec:
