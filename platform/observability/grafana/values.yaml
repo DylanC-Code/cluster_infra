@@ -37,6 +37,9 @@ grafana.ini:
     reporting_enabled: false
   users:
     allow_sign_up: false
+  # The overview (config/), as the sidecar writes it
+  dashboards:
+    default_home_dashboard_path: /tmp/dashboards/overview.dashboard.json
 
 # ---------- Web UI ----------
 # Plain HTTP behind Traefik, Cloudflare Access in front: the hostname and

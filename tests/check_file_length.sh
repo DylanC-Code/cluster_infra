@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # No file over 150 lines (ADR 0002, rule 10): split it by concept instead.
-# Lock files are generated, so they are not concerned.
+# Lock files and dashboards exported from Grafana (*.dashboard.json, ADR
+# 0006) are written by tools, so they are not concerned.
 # Run from the repo root: bash tests/check_file_length.sh
 set -euo pipefail
 
@@ -14,6 +15,6 @@ while read -r path; do
     echo "FAIL: $path has $lines lines (max $max_lines)"
     failed=1
   fi
-done < <(git ls-files --cached --others --exclude-standard | grep -v -e '\.lock$' -e '-lock\.json$')
+done < <(git ls-files --cached --others --exclude-standard | grep -v -e '\.lock$' -e '-lock\.json$' -e '\.dashboard\.json$')
 
 exit "$failed"
