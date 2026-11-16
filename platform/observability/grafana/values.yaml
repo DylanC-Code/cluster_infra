@@ -1,0 +1,52 @@
+# Grafana settings shared by every cluster.
+# Cluster-specific ones: clusters/<name>/values/grafana.yaml (its address,
+# its admin password from Bitwarden)
+fullnameOverride: grafana
+
+# ---------- One copy, no database ----------
+# Its own state (users, preferences) is a SQLite file inside the pod. Its
+# data source and dashboards are ConfigMaps from Git (victoria_metrics), so a
+# Grafana rescheduled after a node loss comes back with all of them; it just
+# forgets your preferences. Alerting never depends on it.
+replicas: 1
+persistence:
+  enabled: false
+
+# Sign in as admin, password from Bitwarden (Secret grafana-admin)
+admin:
+  existingSecret: grafana-admin
+
+# ---------- What it shows ----------
+# Every ConfigMap labelled grafana_datasource or grafana_dashboard in its
+# namespace: victoria_metrics' VictoriaMetrics data source and dashboards
+sidecar:
+  datasources:
+    enabled: true
+  dashboards:
+    enabled: true
+
+grafana.ini:
+  analytics:
+    check_for_updates: false
+    reporting_enabled: false
+  users:
+    allow_sign_up: false
+
+# ---------- Web UI ----------
+# Plain HTTP behind Traefik, Cloudflare Access in front: the hostname and
+# the public address are the cluster's (clusters/<name>/values/grafana.yaml)
+route:
+  main:
+    enabled: true
+    parentRefs:
+      - name: traefik
+        namespace: traefik
+
+# Memory limit, no CPU limit (the CPU request guarantees its share)
+resources:
+  requests: { cpu: 50m, memory: 128Mi }
+  limits: { memory: 512Mi }
+
+# The chart's test pod (helm test) isn't used
+testFramework:
+  enabled: false

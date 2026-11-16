@@ -1,0 +1,33 @@
+# eu1's Grafana settings. Shared ones: platform/observability/grafana/values.yaml
+
+# Its web UI, behind Cloudflare Access (*.dylancastor.dev)
+route:
+  main:
+    hostnames:
+      - grafana-eu1.dylancastor.dev
+grafana.ini:
+  server:
+    root_url: https://grafana-eu1.dylancastor.dev
+
+# The admin password, from Bitwarden; the user is always "admin"
+extraObjects:
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: grafana-admin
+      namespace: monitoring
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: platform
+      target:
+        name: grafana-admin
+        template:
+          mergePolicy: Merge
+          data:
+            admin-user: admin
+      data:
+        - secretKey: admin-password
+          remoteRef:
+            key: eu1_grafana_admin_password
