@@ -1,43 +1,27 @@
 # The dashboards victoria_metrics gives Grafana (ADR 0005), read after
-# values.yaml: the chart's default set, minus those this platform has no
-# use for, plus VictoriaLogs' own. The chart's sync job downloads them at
-# each install or upgrade, and deletes the ConfigMaps of those turned off.
+# values.yaml: a short set, each answering one question. The chart's sync
+# job downloads them at each install or upgrade, and deletes the
+# ConfigMaps of those turned off. Turn one back on when it's needed.
+#   Kubernetes / Views (global, namespaces, pods, nodes): usage, by level
+#   Node Exporter Full: one node's disk, network, memory in detail
+#   etcd: the control plane's database
+#   VictoriaMetrics cluster, VictoriaLogs: monitoring itself
+# The home page, Cluster overview, is the grafana component's.
 x-off: &off { enabled: false }
 
 defaultDashboards:
-  dashboards:
-    # Systems this platform doesn't run: Windows, AIX, macOS, several clusters
-    k8s-resources-multicluster: *off
-    k8s-resources-windows-cluster: *off
-    k8s-resources-windows-namespace: *off
-    k8s-resources-windows-pod: *off
-    k8s-windows-cluster-rsrc-use: *off
-    k8s-windows-node-rsrc-use: *off
-    nodes-aix: *off
-    nodes-darwin: *off
-    # Prometheus' own: this platform stores metrics in VictoriaMetrics
-    prometheus: *off
-    prometheus-remote-write: *off
-    victoriametrics-operator: *off
-    # The same data as a dashboard kept below
-    kubernetes-views-global: *off # k8s-resources-* (requests, limits, quotas)
-    kubernetes-views-namespaces: *off
-    kubernetes-views-nodes: *off
-    kubernetes-views-pods: *off
-    kubernetes-system-api-server: *off # apiserver
-    nodes: *off # node-exporter-full
-    node-rsrc-use: *off
-    node-cluster-rsrc-use: *off
-    cluster-total: *off # network: in k8s-resources-* and Hubble
-    namespace-by-pod: *off
-    namespace-by-workload: *off
-    pod-total: *off
-    workload-total: *off
-
-  # VictoriaLogs' servers and collectors (victoria_logs, victoria_logs_collector),
-  # off by default because this chart doesn't install them
   sources:
+    # kube-prometheus' ~30 dashboards (k8s-resources-*, kubelet, apiserver,
+    # Alertmanager, Windows...): the views above show what we read of them
+    kube-prometheus: *off
+    # VictoriaLogs' servers (victoria_logs), off by default because this
+    # chart doesn't install them
     victorialogs-single-node:
       enabled: true
-    victorialogs-vlagent:
-      enabled: true
+
+  dashboards:
+    kubernetes-system-api-server: *off
+    kubernetes-system-coredns: *off
+    victoriametrics-operator: *off
+    victoriametrics-vmagent: *off
+    victoriametrics-vmalert: *off

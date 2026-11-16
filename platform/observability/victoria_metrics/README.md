@@ -32,10 +32,12 @@ firing Watchdog pings healthchecks.io every minute, which alerts from
 outside when the pings stop (the dead man's switch). The addresses are
 secrets: the Secret `alertmanager-receivers`, from Bitwarden, declared in
 `clusters/<name>/values/victoria_metrics.yaml`.
-Dashboards: `dashboards.yaml` (ADR 0005), the chart's default set minus
-those this platform has no use for (Windows, Prometheus, duplicates), plus
-VictoriaLogs' own. The chart's sync job downloads them from their upstream
-repositories at each install or upgrade, as ConfigMaps Grafana loads.
+
+Dashboards: `dashboards.yaml` (ADR 0005), a short set of the chart's
+(Kubernetes views, nodes, etcd, VictoriaMetrics, VictoriaLogs), each
+answering one question; one more is a line to turn on. The chart's sync
+job downloads them from their upstream repositories at each install or
+upgrade, as ConfigMaps Grafana loads.
 
 Depends on: cilium, coredns.
 Depended on by: every alert, Grafana.
