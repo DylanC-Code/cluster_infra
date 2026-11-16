@@ -31,6 +31,12 @@ component_helm_args() {
     --namespace "$(component_field "$component" namespace)" \
     --values "platform/$component/values.yaml"
 
+  # Optional, in this order (ADR 0005)
+  local dashboards="platform/$component/dashboards.yaml"
+  if [[ -f $dashboards ]]; then
+    printf '%s\n' --values "$dashboards"
+  fi
+
   local cluster_values="clusters/$cluster/values/$name.yaml"
   if [[ -f $cluster_values ]]; then
     printf '%s\n' --values "$cluster_values"
