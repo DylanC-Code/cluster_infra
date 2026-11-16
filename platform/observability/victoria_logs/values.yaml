@@ -1,0 +1,59 @@
+# VictoriaLogs settings shared by every cluster: where the pods' logs are
+# kept and searched. Cluster-specific ones (which nodes may hold a copy):
+# clusters/<name>/values/victoria_logs.yaml
+server:
+  fullnameOverride: victoria-logs
+
+  # ---------- Two full copies, on two nodes ----------
+  # Two independent servers, not a cluster: the collector sends every line
+  # to both. With one lost, the other has everything; the lost one catches
+  # up from the collector's buffer when it comes back.
+  replicaCount: 2
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector: { matchLabels: { app.kubernetes.io/name: victoria-logs-single } }
+
+  # ---------- 14 days, and never more than 8 GiB ----------
+  # The disk limit is a guard: local-path volumes don't enforce their size,
+  # so the oldest days go first if logs ever grow past it.
+  retentionPeriod: 14d
+  retentionDiskSpaceUsage: 8GiB
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+
+  # VictoriaLogs sizes its caches from the memory limit
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 512Mi }
+
+  # Its own metrics, scraped by victoria_metrics' vmagent
+  vmServiceScrape:
+    enabled: true
+
+# A server at a time during a drain: the other keeps every log
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+# ---------- Grafana's data source ----------
+# Loaded by Grafana's sidecar; its type is the VictoriaLogs plugin, which
+# the grafana component installs. Either server answers: both have it all.
+extraObjects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: victoria-logs-datasource
+      labels:
+        grafana_datasource: "1"
+    data:
+      victoria_logs.yaml: |
+        apiVersion: 1
+        datasources:
+          - name: VictoriaLogs
+            uid: victoria-logs
+            type: victoriametrics-logs-datasource
+            access: proxy
+            url: http://victoria-logs.monitoring.svc:9428

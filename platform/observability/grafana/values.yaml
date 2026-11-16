@@ -18,12 +18,18 @@ admin:
 
 # ---------- What it shows ----------
 # Every ConfigMap labelled grafana_datasource or grafana_dashboard in its
-# namespace: victoria_metrics' VictoriaMetrics data source and dashboards
+# namespace: victoria_metrics' data source and dashboards, victoria_logs'
+# data source
 sidecar:
   datasources:
     enabled: true
   dashboards:
     enabled: true
+
+# The VictoriaLogs data source's plugin, downloaded from grafana.com at
+# each start (no disk to keep it): victoria_logs' data source needs it
+plugins:
+  - victoriametrics-logs-datasource@0.33.1
 
 grafana.ini:
   analytics:

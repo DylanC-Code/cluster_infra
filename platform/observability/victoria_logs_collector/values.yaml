@@ -1,0 +1,26 @@
+# Log collector settings shared by every cluster: one agent per node
+# (vlagent) reads the logs of the node's pods and sends them to VictoriaLogs.
+fullnameOverride: victoria-logs-collector
+
+# ---------- Every line to both servers ----------
+# Each server gets its own copy. While one is down, its lines wait in a
+# buffer on the node's disk (at most 1 GiB per server), sent when it returns.
+remoteWrite:
+  - url: http://victoria-logs-0.victoria-logs.monitoring.svc:9428
+    maxDiskUsagePerURL: 1GiB
+  - url: http://victoria-logs-1.victoria-logs.monitoring.svc:9428
+    maxDiskUsagePerURL: 1GiB
+
+# Every node, whatever its taints: a node's logs are read only from it
+tolerations:
+  - operator: Exists
+priorityClassName: system-node-critical
+
+resources:
+  requests: { cpu: 20m, memory: 64Mi }
+  limits: { memory: 256Mi }
+
+# Its own metrics, scraped by victoria_metrics' vmagent
+podMonitor:
+  enabled: true
+  vm: true
