@@ -10,4 +10,5 @@ File name: `NNNN_short_title.md`, numbered in order.
 | [0001](0001_record_architecture_decisions.md) | Record decisions as ADRs | Accepted |
 | [0002](0002_repository_layout.md) | Repository layout and rules | Accepted, rules 3 and 5 amended by 0004 |
 | [0003](0003_platform_choices.md) | Platform choices for the eu1 cluster | Accepted |
-| [0004](0004_component_source_file.md) | Each component declares its chart in source.yaml | Accepted |
+| [0004](0004_component_source_file.md) | Each component declares its chart in source.yaml | Accepted, rule 3 amended by 0005 |
+| [0005](0005_component_dashboards_file.md) | A component's dashboards in their own values file | Accepted |

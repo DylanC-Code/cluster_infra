@@ -38,6 +38,7 @@ spec:
             releaseName: '{{ base .component | replace "_" "-" }}'
             valueFiles:
               - "$values/platform/{{ .component }}/values.yaml"
+              - "$values/platform/{{ .component }}/dashboards.yaml"
               - "$values/clusters/eu1/values/{{ base .component }}.yaml"
             ignoreMissingValueFiles: true
         - repoURL: https://github.com/DylanC-Code/cluster_infra.git
