@@ -1,0 +1,17 @@
+# The website in staging: staging.dylancastor.com. Not deployed yet: put
+# Cloudflare Access in front of that hostname first, then add it to
+# clusters/<name>/apps.yaml.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - name: ghcr.io/dylanc-code/dylancastor-site
+    newTag: 0701f70e887c9c1412859f4f356089eda5f33f40
+patches:
+  - target: { kind: Deployment, name: web }
+    patch: |-
+      - { op: replace, path: /spec/template/spec/priorityClassName, value: app-staging }
+  - target: { kind: HTTPRoute, name: web }
+    patch: |-
+      - { op: replace, path: /spec/hostnames, value: [staging.dylancastor.com] }

@@ -1,0 +1,17 @@
+# The website in prod: dylancastor.com, public (no Cloudflare Access).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - www_redirect.yaml
+# The commit it runs: a deploy or a rollback is this line
+images:
+  - name: ghcr.io/dylanc-code/dylancastor-site
+    newTag: 0701f70e887c9c1412859f4f356089eda5f33f40
+patches:
+  - target: { kind: Deployment, name: web }
+    patch: |-
+      - { op: replace, path: /spec/template/spec/priorityClassName, value: app-prod }
+  - target: { kind: HTTPRoute, name: web }
+    patch: |-
+      - { op: replace, path: /spec/hostnames, value: [dylancastor.com] }
