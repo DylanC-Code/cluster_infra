@@ -1,0 +1,15 @@
+# The alert and recording rules victoria_metrics evaluates (ADR 0007), read
+# after values.yaml and dashboards.yaml: the chart's defaults, minus those
+# that don't fit this platform. A replacement, if any, is in config/.
+defaultRules:
+  rules:
+    # Its 0.15 s limit is for members in one data centre: replaced by
+    # config/etcd_rules.yaml, for members in different sites
+    etcdMemberCommunicationSlow:
+      enabled: false
+
+  groups:
+    # Pods set no CPU limit here (requests only, so nothing is throttled):
+    # these recording rules have nothing to record, and alert about it
+    k8s.rules.container_cpu_limits:
+      enabled: false
