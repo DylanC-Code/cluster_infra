@@ -8,4 +8,5 @@
 # bootstrap/apps_appset.yaml turns each entry into an Argo CD Application
 # named <app>-<env>, built from apps/<app>/overlays/<env>/, in its own
 # namespace <app>-<env>. Empty until the first app (the website).
-[]
+- app: website
+  env: prod

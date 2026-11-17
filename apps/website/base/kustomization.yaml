@@ -1,0 +1,14 @@
+# The website, the same in every environment. An overlay sets the image's
+# commit, the priority of its environment and its hostname.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# On every object and its pods (Kyverno checks it), never in the selectors
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: website
+    includeTemplates: true
+resources:
+  - deployment.yaml
+  - service.yaml
+  - disruption_budget.yaml
+  - route.yaml

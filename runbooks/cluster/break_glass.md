@@ -56,7 +56,7 @@ The aliases live in `.devcontainer/shell/k8s_aliases.sh`, with the
       kubectl -n cloudflared logs daemonset/cloudflared | grep -i "registered tunnel connection"
 
 - Routes: tunnel `eu1` → Public hostnames: `*.dylancastor.dev` (Protect
-  with Access on) and `*.dylancastor.com` (off), both to
+  with Access on), `*.dylancastor.com` and `dylancastor.com` (off), all to
   `http://traefik.traefik.svc.cluster.local:80`.
 - Access: Access controls → Applications → `dylancastor.dev · all`.
   Deleting or disabling it never opens the admin UIs: the tunnel still

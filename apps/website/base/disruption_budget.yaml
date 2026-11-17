@@ -1,0 +1,10 @@
+# One copy at a time during a drain (kured's reboots): the site stays up
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web
