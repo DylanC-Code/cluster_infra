@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# The repo keeps its shape (ADR 0002, 0004, 0005):
+# The repo keeps its shape (ADR 0002, 0004, 0005, 0007):
 #   - platform/ has only the five categories, each component its contract
-#     (ADR 0005: an optional dashboards.yaml)
+#     (ADR 0005, 0007: an optional dashboards.yaml and rules.yaml)
 #   - each app and each cluster has exactly its contract
 #   - every line of platform.yaml, apps.yaml and every values file points
 #     to something that exists, and every app size is in the size table
@@ -37,7 +37,7 @@ for dir in platform/*/; do
   category=$(basename "$dir")
   [[ " $categories " == *" $category "* ]] || fail "platform/$category: not one of: $categories"
   for component in "$dir"*/; do
-    check_contract "${component%/}" "README.md source.yaml values.yaml" "config dashboards.yaml"
+    check_contract "${component%/}" "README.md source.yaml values.yaml" "config dashboards.yaml rules.yaml"
     [[ -f ${component}source.yaml ]] || continue
     fields=$(sed -n 's/^\([a-z_]*\):.*/\1/p' "${component}source.yaml" | sort | tr '\n' ' ')
     [[ $fields == "chart namespace repo version " ]] \

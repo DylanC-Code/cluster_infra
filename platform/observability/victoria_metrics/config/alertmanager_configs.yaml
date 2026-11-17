@@ -39,9 +39,26 @@ spec:
       webhook_configs:
         - url_secret: { name: alertmanager-receivers, key: healthchecks_url }
           send_resolved: false
+    # One line per alert: what fired and where, not every label
     - name: discord-critical
       discord_configs:
         - webhook_url_secret: { name: alertmanager-receivers, key: discord_critical_url }
+          title: &title |-
+            {{ if eq .Status "resolved" }}✅{{ else if eq .CommonLabels.severity "critical" }}🔴{{ else }}🟠{{ end }}
+            {{- " " }}{{ .CommonLabels.alertname }}
+            {{- if gt (len .Alerts.Firing) 1 }} ×{{ len .Alerts.Firing }}{{ end }}
+          # Per alert: where, what, then the details in small print
+          message: &message |-
+            {{ range .Alerts -}}
+            {{ if eq .Status "resolved" }}✅ {{ end }}
+            {{- if .Labels.pod }}{{ .Labels.namespace }}/{{ .Labels.pod }}
+            {{- else if .Labels.node }}{{ .Labels.node }}
+            {{- else if and .Labels.instance (ne .Labels.job "kube-state-metrics") }}{{ .Labels.instance }}
+            {{- else }}{{ .Labels.namespace }}{{ end }}: **{{ .Annotations.summary }}**
+            {{ with .Annotations.description }}-# {{ reReplaceAll "\\s*\\n\\s*" " " . }}{{ "\n" }}{{ end }}
+            {{- end -}}
     - name: discord-warnings
       discord_configs:
         - webhook_url_secret: { name: alertmanager-receivers, key: discord_warnings_url }
+          title: *title
+          message: *message

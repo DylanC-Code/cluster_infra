@@ -39,6 +39,7 @@ spec:
             valueFiles:
               - "$values/platform/{{ .component }}/values.yaml"
               - "$values/platform/{{ .component }}/dashboards.yaml"
+              - "$values/platform/{{ .component }}/rules.yaml"
               - "$values/clusters/eu1/values/{{ base .component }}.yaml"
             ignoreMissingValueFiles: true
         - repoURL: https://github.com/DylanC-Code/cluster_infra.git

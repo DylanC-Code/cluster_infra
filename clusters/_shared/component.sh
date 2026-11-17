@@ -31,11 +31,13 @@ component_helm_args() {
     --namespace "$(component_field "$component" namespace)" \
     --values "platform/$component/values.yaml"
 
-  # Optional, in this order (ADR 0005)
-  local dashboards="platform/$component/dashboards.yaml"
-  if [[ -f $dashboards ]]; then
-    printf '%s\n' --values "$dashboards"
-  fi
+  # Optional, in this order (ADR 0005, 0007)
+  local optional
+  for optional in dashboards rules; do
+    if [[ -f platform/$component/$optional.yaml ]]; then
+      printf '%s\n' --values "platform/$component/$optional.yaml"
+    fi
+  done
 
   local cluster_values="clusters/$cluster/values/$name.yaml"
   if [[ -f $cluster_values ]]; then
