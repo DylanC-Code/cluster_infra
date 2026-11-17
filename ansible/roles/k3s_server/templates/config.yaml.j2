@@ -28,6 +28,9 @@ disable:
   - servicelb
     # One copy only, not configurable: platform/networking/coredns replaces it
   - coredns
+    # A HelmChart for k3s's Helm controller, turned off below: it would retry
+    # every 17 s, forever. Gateway API's CRDs: platform/networking/traefik
+  - gateway-api-crd
 disable-helm-controller: true
 
 # ---------- Metrics, scraped by VictoriaMetrics ----------
