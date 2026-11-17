@@ -51,7 +51,8 @@ spec:
           message: &message |-
             {{ range .Alerts -}}
             {{ if eq .Status "resolved" }}✅ {{ end }}
-            {{- if .Labels.pod }}{{ .Labels.namespace }}/{{ .Labels.pod }}
+            {{- if eq .Labels.job "node-exporter" }}{{ .Labels.instance }}
+            {{- else if .Labels.pod }}{{ .Labels.namespace }}/{{ .Labels.pod }}
             {{- else if .Labels.node }}{{ .Labels.node }}
             {{- else if and .Labels.instance (ne .Labels.job "kube-state-metrics") }}{{ .Labels.instance }}
             {{- else }}{{ .Labels.namespace }}{{ end }}: **{{ .Annotations.summary }}**
