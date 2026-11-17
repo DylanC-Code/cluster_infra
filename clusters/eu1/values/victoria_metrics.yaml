@@ -1,8 +1,33 @@
 # eu1's VictoriaMetrics settings. Shared ones: platform/observability/victoria_metrics/values.yaml
 
+# waw1 has the least memory: k3s alone takes ~1.7 GB of its 3.8, and a
+# squeeze there cost us waw1 for ~15 minutes on 2026-11-17. So every part
+# running 2 copies stays on par1 and gra1; only vmstorage (one copy per
+# node) uses waw1. Until waw1 has 8 GB.
+x-not-waw1: &not_waw1
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - { key: kubernetes.io/hostname, operator: NotIn, values: [waw1] }
+
+vmcluster:
+  spec:
+    vmselect:
+      affinity: *not_waw1
+    vminsert:
+      affinity: *not_waw1
+vmalert:
+  spec:
+    affinity: *not_waw1
+alertmanager:
+  spec:
+    affinity: *not_waw1
+
 # Every series says which cluster it comes from
 vmagent:
   spec:
+    affinity: *not_waw1
     externalLabels:
       cluster: eu1
 
