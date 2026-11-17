@@ -9,6 +9,14 @@ grafana.ini:
   server:
     root_url: https://grafana-eu1.dylancastor.dev
 
+# Off waw1, the node with the least memory (victoria_metrics.yaml says why)
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - { key: kubernetes.io/hostname, operator: NotIn, values: [waw1] }
+
 # The admin password, from Bitwarden; the user is always "admin"
 extraObjects:
   - apiVersion: external-secrets.io/v1
