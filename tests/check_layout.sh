@@ -49,7 +49,7 @@ done
 for app in apps/*/; do
   [[ $(basename "$app") == _* ]] && continue
   check_contract "${app%/}" "README.md base overlays"
-  check_contract "${app}overlays" "staging prod"
+  check_contract "${app}overlays" "prod" "staging"
 done
 
 # ---------- clusters/ ----------
