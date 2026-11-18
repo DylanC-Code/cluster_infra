@@ -1,8 +1,7 @@
-// Renovate: opens a pull request when a pinned version has a newer release.
-// Each of its PRs runs the repo's checks (tests/run_all.sh) like any other.
 // What it watches: the charts in platform/*/*/source.yaml, the devcontainer
 // tools (.devcontainer/versions.env), the Cilium schema in devcontainer.json,
-// the GitHub Actions, the Ansible collections, k3s (dashboard only).
+// the GitHub Actions, the Ansible collections, k3s (dashboard only), and the
+// apps' own images (apps/*/overlays/*/kustomization.yaml, pinned by digest).
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
@@ -134,6 +133,25 @@
       "groupName": "k3s and kubectl",
       "dependencyDashboardApproval": true,
       "automerge": false,
+    },
+    {
+      "description": "Our own app images: a deploy PR as soon as main moves, merged by hand",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchFileNames": [
+        "apps/**"
+      ],
+      "matchPackageNames": [
+        "ghcr.io/dylanc-code/**"
+      ],
+      // Our own code: no waiting period, no Monday-only schedule
+      "minimumReleaseAge": "0 days",
+      "schedule": [
+        "at any time"
+      ],
+      "automerge": false,
+      "commitMessageTopic": "{{depName}} in {{parentDir}}",
     },
   ],
 }
