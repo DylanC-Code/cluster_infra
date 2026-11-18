@@ -6,6 +6,6 @@ kind: Kustomization
 resources:
   # The standard Gateway API types. The Traefik chart no longer ships them:
   # its release notes say which version it needs
-  - https://github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.6.3
+  - https://github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.7.0
   - gateway_classes.yaml
   - gateways.yaml
