@@ -25,7 +25,7 @@ controllers:
       cloudflared:
         image:
           repository: docker.io/cloudflare/cloudflared
-          tag: 2026.10.7
+          tag: 2026.10.7@sha256:4955524aeaa379e154023d5a027c250f7b35041a2e7e950cf13f144bc9b9c5ba
         # The image runs "cloudflared --no-autoupdate". The tunnel is
         # managed in Cloudflare: its routes live there (one wildcard per
         # domain, to Traefik), the token in the environment says which tunnel
