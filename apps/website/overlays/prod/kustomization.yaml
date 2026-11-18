@@ -4,10 +4,13 @@ kind: Kustomization
 resources:
   - ../../base
   - www_redirect.yaml
-# The commit it runs: a deploy or a rollback is this line
+# The image it runs: main at one exact digest. Renovate proposes the next
+# digest as a pull request when main moves; merging it deploys, reverting it
+# rolls back (.github/renovate.json5).
 images:
   - name: ghcr.io/dylanc-code/dylancastor-site
-    newTag: 0701f70e887c9c1412859f4f356089eda5f33f40
+    newTag: main
+    digest: sha256:476a07a5c2c5a5cb1b4df98978be4fc02b8177b72ac4ef42319bbbbeb2418473
 patches:
   - target: { kind: Deployment, name: web }
     patch: |-

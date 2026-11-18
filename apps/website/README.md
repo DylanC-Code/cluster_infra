@@ -3,10 +3,11 @@
 dylancastor.com: Dylan's site, static pages built with Astro.
 
 - **Repo**: [DylanC-Code/DylanCastorSite](https://github.com/DylanC-Code/DylanCastorSite).
-  Its CI builds the image on every push to main and publishes it as
-  `ghcr.io/dylanc-code/dylancastor-site:<commit>`. Publishing is not
-  deploying: an overlay names the commit it runs (`images` in its
-  `kustomization.yaml`), and a rollback is that line set back.
+  Its CI scans the image (Trivy) and, on every push to main, publishes it as
+  `ghcr.io/dylanc-code/dylancastor-site:<commit>` and `:main`. Publishing is
+  not deploying: the prod overlay pins `main` by its digest, and Renovate
+  opens a pull request here when `main` moves (`.github/renovate.json5`).
+  Merging it deploys; reverting it rolls back.
 - **Image**: the built pages served as files by static-web-server, on port
   8080, `GET /health` for the probes (the repo's `Dockerfile`, `sws.toml`).
 - **Domains**: prod `dylancastor.com`, with `www.dylancastor.com`
