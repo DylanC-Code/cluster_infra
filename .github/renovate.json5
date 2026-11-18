@@ -136,12 +136,6 @@
     },
     {
       "description": "Our own app images: a deploy PR as soon as main moves, merged by hand",
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchFileNames": [
-        "apps/**"
-      ],
       "matchPackageNames": [
         "ghcr.io/dylanc-code/**"
       ],
@@ -151,7 +145,6 @@
         "at any time"
       ],
       "automerge": false,
-      "commitMessageTopic": "{{depName}} in {{parentDir}}",
     },
   ],
 }
