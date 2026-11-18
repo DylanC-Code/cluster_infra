@@ -10,9 +10,7 @@ dylancastor.com: Dylan's site, static pages built with Astro.
 - **Image**: the built pages served as files by static-web-server, on port
   8080, `GET /health` for the probes (the repo's `Dockerfile`, `sws.toml`).
 - **Domains**: prod `dylancastor.com`, with `www.dylancastor.com`
-  redirected to it; staging `staging.dylancastor.com`, not deployed yet
-  (not in any `clusters/<name>/apps.yaml`): it needs Cloudflare Access in
-  front of it first.
+  redirected to it. No staging (ADR 0008).
 - **Elsewhere**: `dylancastor.com/api/message`, the contact form, is a
   Cloudflare Worker deployed by the site's repo; Cloudflare answers it
   before the tunnel, so it never reaches this app.
