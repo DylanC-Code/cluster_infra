@@ -11,8 +11,8 @@ Every `apps/<app>/` has exactly:
 | --- | --- |
 | `README.md` | What the app is, its domains, its database, its secrets |
 | `base/` | Deployment, service, route, database, external secrets: identical in every environment |
-| `overlays/staging/` | What differs in staging: image tag, replicas, domain, quotas |
 | `overlays/prod/` | What differs in prod |
+| `overlays/staging/` | Optional (ADR 0008): what differs in staging, when the app has one |
 
 Rules:
 
