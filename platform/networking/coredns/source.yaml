@@ -1,5 +1,5 @@
 # This component's chart, read by Argo CD and the bootstrap script.
 repo: https://coredns.github.io/helm
 chart: coredns
-version: 1.50.7
+version: 1.50.8
 namespace: kube-system

@@ -1,5 +1,5 @@
 # This component's chart, read by Argo CD and the bootstrap script.
 repo: https://helm.cilium.io
 chart: cilium
-version: 1.20.4
+version: 1.20.5
 namespace: kube-system
