@@ -1,7 +1,5 @@
-// What it watches: the charts in platform/*/*/source.yaml, the devcontainer
-// tools (.devcontainer/versions.env), the Cilium schema in devcontainer.json,
-// the GitHub Actions, the Ansible collections, k3s (dashboard only), and the
-// apps' own images (apps/*/overlays/*/kustomization.yaml, pinned by digest).
+// Watches: platform charts (source.yaml), devcontainer tools and Cilium schema,
+// GitHub Actions, Ansible collections, k3s (dashboard), apps' images (by digest).
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
@@ -65,16 +63,14 @@
     },
   ],
   // ---------- How updates are grouped and merged ----------
-  // Majors are never grouped: each gets its own PR.
-  // Later rules override earlier ones.
+  // Majors are never grouped (one PR each); later rules override earlier ones.
   "packageRules": [
     {
-      "description": "Platform charts, the Cilium schema with them: wait for a merge by hand",
+      "description": "Platform chart patches, grouped; a minor gets a PR of its own",
       "matchDatasources": [
         "helm"
       ],
       "matchUpdateTypes": [
-        "minor",
         "patch"
       ],
       "groupName": "platform charts",
@@ -100,6 +96,13 @@
       "automerge": true,
     },
     {
+      // 2.22 needs Python 3.13; the devcontainer and CI run Ubuntu 24.04's 3.12
+      "matchPackageNames": [
+        "ansible-core"
+      ],
+      "allowedVersions": "<2.22",
+    },
+    {
       "description": "GitHub Actions: patches and digest updates merge themselves once green",
       "matchManagers": [
         "github-actions"
@@ -118,7 +121,6 @@
       "automerge": true,
     },
     {
-      "description": "Ansible collections",
       "matchManagers": [
         "ansible-galaxy"
       ],
@@ -132,7 +134,6 @@
       ],
       "groupName": "k3s and kubectl",
       "dependencyDashboardApproval": true,
-      "automerge": false,
     },
     {
       "description": "Our own app images: a deploy PR as soon as main moves, merged by hand",
@@ -144,7 +145,6 @@
       "schedule": [
         "at any time"
       ],
-      "automerge": false,
     },
   ],
 }
