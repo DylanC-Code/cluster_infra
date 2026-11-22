@@ -28,7 +28,7 @@ controllers:
       rclone:
         image:
           repository: docker.io/rclone/rclone
-          tag: 1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+          tag: 1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
         # "copy", never "sync": a file deleted in R2 (retention, or an
         # attacker) is never deleted in B2. COPIES lists the pairs,
         # "<R2 bucket>:<B2 bucket>", in the cluster's values.
