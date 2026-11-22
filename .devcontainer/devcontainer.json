@@ -64,7 +64,7 @@
             "apps/*/base/*.yaml",
             "apps/*/overlays/*/*.yaml"
           ],
-          "https://raw.githubusercontent.com/cilium/cilium/v1.20.4/install/kubernetes/cilium/values.schema.json": [
+          "https://raw.githubusercontent.com/cilium/cilium/v1.20.5/install/kubernetes/cilium/values.schema.json": [
             "platform/networking/cilium/values.yaml",
             "clusters/*/values/cilium.yaml"
           ]
