@@ -10,7 +10,7 @@ resources:
 # skips an image that sets `digest` beside `newTag`
 images:
   - name: ghcr.io/dylanc-code/dylancastor-site
-    newTag: main@sha256:476a07a5c2c5a5cb1b4df98978be4fc02b8177b72ac4ef42319bbbbeb2418473
+    newTag: main@sha256:c42aba7ec7c4b9d41f6fff8b8fdc254b293e0a00a1cfcc184dc9cc5d9e638df4
 patches:
   - target: { kind: Deployment, name: web }
     patch: |-
