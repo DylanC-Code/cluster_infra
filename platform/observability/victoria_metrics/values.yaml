@@ -3,12 +3,15 @@
 # Every part runs 2 copies or more on different nodes: monitoring must
 # survive the node loss it is there to report.
 fullnameOverride: vm
-# One copy per node at most, while another node has none (used below)
-x-spread: &spread { maxSkew: 1, topologyKey: kubernetes.io/hostname, whenUnsatisfiable: DoNotSchedule }
+# One copy per node at most, while another node has none; a rollout's old pods don't count
+x-spread: &spread
+  maxSkew: 1
+  topologyKey: kubernetes.io/hostname
+  whenUnsatisfiable: DoNotSchedule
+  matchLabelKeys: [pod-template-hash]
 
 # ---------- Storage: every sample on 2 of the 3 nodes ----------
-vmsingle:
-  enabled: false
+vmsingle: { enabled: false }
 vmcluster:
   enabled: true
   spec:
@@ -28,8 +31,7 @@ vmcluster:
       topologySpreadConstraints:
         - <<: *spread
           labelSelector: { matchLabels: { app.kubernetes.io/name: vmstorage } }
-      podDisruptionBudget:
-        maxUnavailable: 1
+      podDisruptionBudget: { maxUnavailable: 1 }
       # VictoriaMetrics sizes its caches from this limit (60 % of it):
       # 768 Mi is plenty for this cluster and keeps the nodes' memory free
       resources:
@@ -42,8 +44,7 @@ vmcluster:
       topologySpreadConstraints:
         - <<: *spread
           labelSelector: { matchLabels: { app.kubernetes.io/name: vmselect } }
-      podDisruptionBudget:
-        maxUnavailable: 1
+      podDisruptionBudget: { maxUnavailable: 1 }
       resources:
         requests: { cpu: 50m, memory: 128Mi }
         limits: { memory: 512Mi }
@@ -52,8 +53,7 @@ vmcluster:
       topologySpreadConstraints:
         - <<: *spread
           labelSelector: { matchLabels: { app.kubernetes.io/name: vminsert } }
-      podDisruptionBudget:
-        maxUnavailable: 1
+      podDisruptionBudget: { maxUnavailable: 1 }
       resources:
         requests: { cpu: 50m, memory: 128Mi }
         limits: { memory: 512Mi }

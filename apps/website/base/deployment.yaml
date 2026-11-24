@@ -20,6 +20,8 @@ spec:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: DoNotSchedule
+          # Counts this version's pods only: a rollout can't leave two on one node
+          matchLabelKeys: [pod-template-hash]
           labelSelector: { matchLabels: { app.kubernetes.io/name: web } }
       # The image runs as root unless told: any user can read the pages
       securityContext:

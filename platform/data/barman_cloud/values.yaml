@@ -17,6 +17,8 @@ topologySpreadConstraints:
     maxSkew: 1
     topologyKey: kubernetes.io/hostname
     whenUnsatisfiable: DoNotSchedule
+    # Counts this version's pods only: a rollout can't leave two on one node
+    matchLabelKeys: [pod-template-hash]
 
 # Memory limit, no CPU limit (the CPU request guarantees its share)
 resources:

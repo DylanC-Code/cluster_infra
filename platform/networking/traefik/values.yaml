@@ -13,6 +13,8 @@ topologySpreadConstraints:
     topologyKey: kubernetes.io/hostname
     whenUnsatisfiable: DoNotSchedule
 # A drain (kured, an upgrade) never stops more than one copy at once
+    # Counts this version's pods only: a rollout can't leave two on one node
+    matchLabelKeys: [pod-template-hash]
 podDisruptionBudget:
   enabled: true
   maxUnavailable: 1
