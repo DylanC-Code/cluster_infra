@@ -2,6 +2,13 @@
 # Its web UI, behind Cloudflare Access (*.dylancastor.dev)
 global:
   domain: argocd-eu1.dylancastor.dev
+  # Every Argo CD pod off waw1, the node with the least memory
+  # (victoria_metrics.yaml says why): repo-server alone takes hundreds of MB
+  affinity:
+    nodeAffinity:
+      type: hard
+      matchExpressions:
+        - { key: kubernetes.io/hostname, operator: NotIn, values: [waw1] }
 server:
   httproute:
     hostnames:
