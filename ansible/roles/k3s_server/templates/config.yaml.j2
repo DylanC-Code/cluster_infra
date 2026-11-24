@@ -33,6 +33,17 @@ disable:
   - gateway-api-crd
 disable-helm-controller: true
 
+# ---------- Memory kept for k3s and the system ----------
+# k3s is one process (API server, etcd, kubelet: ~1.7 GB on waw1) that the
+# scheduler never counted, so it filled waw1 until the node froze
+# (2026-11-24). Pods now get only the rest, and the kubelet evicts pods
+# while 256 Mi are still free. Setting eviction-hard replaces all its
+# defaults: the disk ones are written again, as they were
+kubelet-arg:
+  - "kube-reserved=cpu=200m,memory=1536Mi"
+  - "system-reserved=cpu=100m,memory=256Mi"
+  - "eviction-hard=memory.available<256Mi,nodefs.available<10%,nodefs.inodesFree<5%,imagefs.available<15%"
+
 # ---------- Metrics, scraped by VictoriaMetrics ----------
 # etcd's own metrics on 2381 (plain HTTP). Reachable from the cluster only:
 # the firewalls never accept this port from outside. The scheduler's and
